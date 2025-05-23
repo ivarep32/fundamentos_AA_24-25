@@ -4,15 +4,6 @@ Este repositorio contiene scripts asociados a las sesiones prácticas de la asig
 
 ---
 
-## 📑 Índice
-
-- [⚙️ Configura tu entorno de trabajo](#️-configura-tu-entorno-de-trabajo)
-- [🍀 Consejos y mensajes del autor](#-consejos-y-mensajes-del-autor)
-- [🚀 Recomendación de IDE](#-recomendación-de-ide)
-- [📂 Relación de scripts con sesiones](#-relación-de-scripts-con-sesiones)
-
----
-
 ## ⚙️ Configura tu entorno de trabajo
 
 > Es posible que necesites **mover el directorio de trabajo (Working Directory)** cuando abras un script en tu ordenador para que pueda acceder correctamente a los datasets.
@@ -28,8 +19,8 @@ Si los archivos cambian de nombre o ubicación, **simplemente actualiza las ruta
 ## 🍀 Consejos y mensajes del autor
 
 - ¡Buena suerte con esta asignatura!
-- Al menos ya **no os dará clase MJ Ginzo** 😅
-- **Casi todos los comentarios de los scripts fueron generados con ChatGPT**, que sinceramente **explica mejor fundamentos que yo** 😅
+- Al menos ya **no os dará clase MJ Ginzo aka Maka Paka** 
+- **Casi todos los comentarios de los scripts fueron generados con ChatGPT**, que sinceramente **explica mejor fundamentos que yo**
 
 ---
 
