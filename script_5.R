@@ -2,7 +2,13 @@
 # REGRESIÓN LINEAL GENERAL CON R (USANDO savings)
 #-----------------------------------------------------------
 #-----------------------------------------------------------
-# 1. Cargar datos y ajuste inicial del modelo
+# Sección 1: Ajuste de un modelo de regresión lineal
+# Objetivo: Ajustar un modelo de regresión lineal múltiple con R
+# sobre la base de datos `savings` del paquete `faraway`.
+# El modelo que se propone es:
+# Y = β0 + β1*pop15 + β2*pop75 + β3*dpi + β4*ddpi + ε
+# donde Y = tasa de ahorro (sr), y el resto son variables explicativas
+# socioeconómicas.
 #-----------------------------------------------------------
 # Cargamos la librería faraway que contiene los datos
 library(faraway)
@@ -17,8 +23,18 @@ z <- lm(savings$sr ~ savings$pop15 + savings$pop75 + savings$dpi + savings$ddpi)
 
 summary(z)
 
+# El resumen proporciona:
+# - Coeficientes estimados (β̂)
+# - Error estándar
+# - Valor t y p-valor para cada coeficiente
+# - R² y RSE (residual standard error)
+
+# Interpretación:
+# Por ejemplo, un coeficiente negativo en pop15 indica que a mayor % de
+# población joven, menor tasa de ahorro, con significación estadística.
+
 #-----------------------------------------------------------
-# 2. Estimación de los parametros del modelo
+# Sección 1.1: Estimación de los parámetros del modelo
 #-----------------------------------------------------------
 beta <- coef(z)
 
@@ -30,31 +46,22 @@ n<-nrow(X)
 p <- ncol(X)
 
 #-----------------------------------------------------------
-# 3. Interpretación geométrica: matriz hat y predicciones
+# Sección 1.2: Interpretación geométrica
+# En regresión, la predicción se expresa matricialmente como:
+# Ŷ = H * Y, donde H = X(X'X)^(-1)X' es la matriz hat.
+# Esta proyecta Y en el subespacio generado por las columnas de X.
+
 #-----------------------------------------------------------
-#matriz hat H = X(X'X)^(-1)X'
 
 XtXi <- solve(t(X) %*% X)
 H <- X %*% XtXi %*% t(X)
 
-#predicciones y_hat= H * Y
+# Cálculo manual del vector β̂
+y <- savings$sr
+hbeta <- XtXi %*% t(X) %*% y
+hbeta  # debe coincidir con coef(modelo)
 
-Y <- savings$sr
-hbeta <- XtXi %*% t(X) %*% Y
 
-# verificamos que coincide con coef(z)
-hbeta
 
-#-----------------------------------------------------------
-# 4. Estimación de la varianza del error
-#-----------------------------------------------------------
-# Matriz generadora de residuos: M = I - H
-M <- diag(1, nrow=n) - H
 
-# Suma residual de cuadrados (RSS)
-RSS <- t(Y - X %*% hbeta) %*% (Y - X %*% hbeta)
-
-# Varianza residual estimada σ̂² = RSS / (n - p)
-sigma2 <- RSS / (n - p)
-sigma2
 
