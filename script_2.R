@@ -274,3 +274,21 @@ analizar_numeros <- function(n){
   ))
 
 }
+
+#Escribe una función par.impar en R que realice la suma de todos los números pares
+# y también de todos los número impares comprendidos entre 1 y 200.
+par_impar <- function(){
+  # incializamos
+  suma_par <- 0
+  suma_impar <- 0
+  for(i in 1:200){
+    if (i%%2==0){
+      suma_par <- suma_par + i
+    }
+    else{
+      suma_impar <- suma_impar + i
+    }
+  }
+  cat("La suma de los pares es: ", suma_par, "\n")
+  cat("La suma de los impares es: ", suma_impar)
+}
