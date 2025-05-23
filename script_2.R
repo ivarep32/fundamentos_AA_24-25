@@ -382,3 +382,22 @@ multiplos_3_7 <- function(){
 
   return(numeros_validos)
 }
+
+#Desarrolla una función en R llamada triangulo_rectangulo que tome como entrada un número entero largo positivo y
+# construya un triángulo rectángulo con los dígitos del mismo.
+triangulo_rectangulo <- function(n){
+  #validar numero
+  if(!is.numeric(n) || n <=0 || n != floor(n)){
+    stop("El numero debe ser entero positivo")
+  }
+
+  # sacar los caracteres
+  digitos <- strsplit(as.character(n), "")[[1]]
+
+  #construir e imprimir el triangulo
+  for(i in 1:length(digitos)){
+    #imprimir los primeros i digitos
+    cat(paste0(digitos[1:i], collapse=""))
+    cat("\n")
+  }
+}
