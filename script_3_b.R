@@ -207,3 +207,50 @@ c(b0, b1)
 #   deben estar muy cerca de los obtenidos con lm().
 coef(modelo_ref)
 #podemos ver que los valores coinciden, lo hemos implementado bien
+
+#------------------------------------------------------------------------------------------------------------
+#2.2. Metodo  de  descenso  de  gradiente  estocástico
+# ⚙️ Descenso de gradiente estocástico (SGD)
+
+# - A diferencia del batch, el SGD actualiza los parámetros usando **una sola observación a la vez**.
+# - Esto lo hace mucho más eficiente en datasets grandes, ya que no necesita calcular la suma total
+#   de todos los errores en cada iteración.
+
+# - Algoritmo:
+#   Para cada observación i:
+#     β0 ← β0 + t * (yᵢ - (β0 + β1 * xᵢ))
+#     β1 ← β1 + t * xᵢ * (yᵢ - (β0 + β1 * xᵢ))
+
+# - Aunque SGD es más ruidoso (las actualizaciones varían más), suele converger más rápido en la práctica.
+#------------------------------------------------------------------------------------------------------------
+# Inicialización
+b0 <- 0
+b1 <- 0
+t <- 0.001
+epochs <- 10  # Número de veces que recorremos el dataset entero
+
+# Iteraciones de SGD
+for (e in 1:epochs) {
+  for (i in 1:n) {
+    error_i <- y[i] - (b0 + b1 * x[i])
+    b0 <- b0 + t * error_i
+    b1 <- b1 + t * x[i] * error_i
+  }
+}
+
+# Coeficientes estimados por SGD
+c(b0, b1)
+
+# Comparar los coeficientes:
+coef(modelo_ref)  # Referencia
+c(b0, b1)          # SGD estimado
+
+# vemos una vez mas que coinciden, hemos implementado bien
+#----------------------------------------------------------------------
+# 🔍 Comparación final de métodos:
+
+# - lm()     → solución exacta por mínimos cuadrados
+# - batch    → solución iterativa global, lenta pero precisa
+# - SGD      → solución iterativa rápida, eficiente en datos grandes
+#----------------------------------------------------------------------
+
