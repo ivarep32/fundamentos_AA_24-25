@@ -200,3 +200,10 @@ for (i in 1:iter) {
 
 # Coeficientes estimados por el metodo batch
 c(b0, b1)
+
+# 🧾 Comparación con el modelo de referencia ajustado con lm()
+
+# - Si el metodo converge correctamente, los coeficientes estimados por gradiente
+#   deben estar muy cerca de los obtenidos con lm().
+coef(modelo_ref)
+#podemos ver que los valores coinciden, lo hemos implementado bien
