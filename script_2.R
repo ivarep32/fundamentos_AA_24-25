@@ -401,3 +401,27 @@ triangulo_rectangulo <- function(n){
     cat("\n")
   }
 }
+#Desarrolla un programa en R que, dadas dos listas de enteros, una con N elementos y otra con M elementos,
+# devuelva una lista ordenada de elementos que resulta de la concatenación de ambas listas. El programa deberá:
+#a)    Deﬁnir  una  función  llamada  concatenar_ordenar_listas  que  tome  como  entrada  dos listas  de  enteros.
+#b)    Concatenar  ambas  listas  en  una  sola  lista.
+#c)    Ordenar  la  lista  resultante  de  manera  ascendente.
+#d)    Devolver  la  lista  ordenada  como  resultado.
+#El   programa   debe   ser   capaz   de   manejar   listas   de   diferentes   longitudes   y   garantizar
+# que   la lista  resultante  esté  ordenada  correctamente.
+concatenar_ordenar_listas <- function(lista1, lista2) {
+  # Validación de entrada
+  if (!is.vector(lista1) || !is.vector(lista2) ||
+      !all(sapply(lista1, is.numeric)) || !all(sapply(lista2, is.numeric))) {
+    stop("Las entradas deben ser listas de números enteros")
+  }
+
+  # b) Concatenar las listas usando c()
+  lista_concatenada <- c(lista1, lista2)
+
+  # c) Ordenar la lista resultante de manera ascendente
+  lista_ordenada <- sort(lista_concatenada)
+
+  # d) Devolver la lista ordenada
+  return(lista_ordenada)
+}
