@@ -330,3 +330,55 @@ suma_producto <- function() {
   
   return(resultado)
 }
+
+#Desarrolla un programa en R que, dado un número entero diferente de 0 y 1 proporcionado por el usuario, escriba todos los
+# enteros comprendidos entre 1 y N que sean múltiplos de 3 o de 7, pero no múltiplos de los dos a la vez. Además, el programa
+# debe manejar correctamente el caso en el que N sea negativo. El programa deberá:
+#a)    Solicitar  al  usuario  que  ingrese  un  número  entero  diferente  de  0  y  1.
+#b)    Identiﬁcar  todos  los  enteros  entre  1  y  N   (o  N   y  1  si  N   es  negativo)  que  sean  múltiplos de  3  o  de  7,
+# pero  no  de  ambos  a  la  vez.
+#c)    Imprimir  los  números  encontrados  que  cumplen  con  la  condición  establecida.
+#El  programa  debe  ser  capaz  de  manejar  números  negativos  correctamente  y  garantizar  que el  usuario  ingrese  un  número  válido  como  entrada.
+
+multiplos_3_7 <- function(){
+  #verficar entrada
+  repeat{
+    numero <- as.numeric(readline("Introduce el numero (entero y diferente de 0 y 1)"))
+    # verificar que es valido
+    if(!is.na(numero) && numero !=0 && numero!=1 && numero == round(numero)){
+      break
+    }
+    else{
+      cat("Introduce un numero valido por favor")
+    }
+  }
+  #determinar rango
+  inicio <- 1
+  fin <- numero
+  if (numero <0){
+    inicio <- numero
+    fin <- 1
+  }
+  #vector que va a almacenar el resultado
+  numeros_validos <- c()
+
+  # encontrar los multiplos
+  for(i in inicio:fin){
+    #verificar si es multiplo de 3 o 7 (pero no a la vez)
+    multiplo_3 <- i %% 3 == 0
+    multiplo_7 <- i %% 7 == 0
+
+    if((multiplo_3 || multiplo_7) && !(multiplo_3 && multiplo_7)){
+      numeros_validos <- c(numeros_validos,i)
+    }
+  }
+
+  #resultados
+  if(length(numeros_validos)>0){
+    cat("\nNúmeros múltiplos de 3 o 7 entre ", inicio, " y ", fin, "\n")
+} else {
+    cat("\nNo se encontraron números que cumplan la condición entre ", inicio, " y ", fin, "\n")
+}
+
+  return(numeros_validos)
+}
