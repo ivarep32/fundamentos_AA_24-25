@@ -209,3 +209,34 @@ numeros_especiales <- function() {
   
   return(numeros_encontrados)
 }
+
+#Desarrolla una función en R llamada suma_par_impar que calcule la suma de todos los números pares y todos los números
+# impares comprendidos entre 1 y 200. La función deberá devolver ambas sumas como resultado. El programa deberá:
+#a)    Utilizar  bucles  o  funciones  de  secuencia  para  generar  los  números  pares  e  impares.
+#b)    Calcular  la  suma  de  los  números  pares  y  la  suma  de  los  números  impares.
+#c)    Devolver  ambas  sumas  como  resultado.
+#Luego  de  deﬁnir  la  función,  deberás  llamarla  e  imprimir  las  sumas  de  los  números  pares  y  los números  impares.
+
+suma_par_impar <- function(){
+  # incializamos lsa variable
+  suma_par <- 0
+  suma_impar <- 0
+
+  # iteramos
+  for (i in 1:200){
+    #verificamos si el numero es par o impar
+    if(i%%2==0){
+      suma_par <- suma_par + i
+    }
+    else{
+      suma_impar <- suma_impar + i
+    }
+  }
+  resultado <-list(
+    suma_par = suma_par,
+    suma_impar = suma_impar
+  )
+  cat("Suma pares: ", suma_par, "\n")
+  cat("Suma impares ", suma_impar, "\n")
+  return(resultado)
+}
