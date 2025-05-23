@@ -240,3 +240,37 @@ suma_par_impar <- function(){
   cat("Suma impares ", suma_impar, "\n")
   return(resultado)
 }
+
+#Desarrolla  un  programa  en  R  que  permita  analizar  un  número  entero  dado  por  el  usuario.
+# El programa  deberá:
+#a)    Calcular  el  número  de  cifras  que  tiene  el  número  entero.
+#b)    Determinar  cuál  es  la  menor  y  la  mayor  cifra  presente  en  el  número.
+#c)    Identiﬁcar  la  posición  que  ocupan  la  menor  y  la  mayor  cifra  en  el  número.
+#d)    Finalmente,  mostrar  al  usuario  el  número  de  cifras,  el  valor  de  la  menor  y  la
+# mayor  cifra, y  la  posición  que  ocupan  cada  una  de  ellas.
+#El  programa  deberá  deﬁnir  una  función  llamada  analizar_numeros  que  tome  como  entrada el
+# número  entero  a  analizar  y  devuelva  los  resultados  mencionados  anteriormente.
+
+analizar_numeros <- function(n){
+  #sacar los digitos
+  digitos <- as.numeric(strsplit(as.character(abs(n)),"")[[1]])
+
+  num_cifras <- length(digitos)
+  cifra_menor <- min(digitos)
+  cifra_mayor <- max(digitos)
+
+  posicion_menor <- which(digitos == cifra_menor)
+  pos_mayor <- which(digitos == cifra_mayor)
+
+  cat("Numero de cifras ",num_cifras, "\n")
+  cat("Cifra menor ",cifra_menor, "en posicion(es) ",paste(posicion_menor, collapse = ", " ),"\n")
+  cat("Cifra mayor ",cifra_mayor, "en posicion(es) ",paste(pos_mayor, collapse = ", " ),"\n")
+
+  return(list(
+    num_cifras = num_cifras,
+    menor = list(valor=cifra_menor, posiciones = posicion_menor),
+    mayor = list(valor=cifra_mayor, posiciones = pos_mayor)
+
+  ))
+
+}
