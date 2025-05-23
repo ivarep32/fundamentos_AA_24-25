@@ -244,7 +244,7 @@ suma_par_impar <- function(){
 #Desarrolla  un  programa  en  R  que  permita  analizar  un  número  entero  dado  por  el  usuario.
 # El programa  deberá:
 #a)    Calcular  el  número  de  cifras  que  tiene  el  número  entero.
-#b)    Determinar  cuál  es  la  menor  y  la  mayor  cifra  presente  en  el  número.
+#b)    Determinar  cuál  es  la  menor  y  la  mayor  cifra  presente  en el  número.
 #c)    Identiﬁcar  la  posición  que  ocupan  la  menor  y  la  mayor  cifra  en  el  número.
 #d)    Finalmente,  mostrar  al  usuario  el  número  de  cifras,  el  valor  de  la  menor  y  la
 # mayor  cifra, y  la  posición  que  ocupan  cada  una  de  ellas.
@@ -291,4 +291,42 @@ par_impar <- function(){
   }
   cat("La suma de los pares es: ", suma_par, "\n")
   cat("La suma de los impares es: ", suma_impar)
+}
+
+#Desarrolla una función en R llamada suma_producto que solicite al usuario que introduzca cinco
+# números por teclado. Además, el programa deberá ofrecer al usuario la posibilidad de elegir entre
+# sumar los números o multiplicarlos. Si se elige la opción de suma, la función de- volverá un
+# mensaje con el resultado de la suma de los cinco números. Si se elige la opción de producto,
+# la función devolverá un mensaje con el resultado del producto de los cinco números.
+# Para realizar los cálculos, puedes utilizar las funciones sum y prod. El programa deberá deﬁnir una
+# función llamada suma_producto que tome como entrada los cinco números ingresados por el usuario y la
+# opción elegida (suma o producto) y devuelva el resultado correspondiente.
+suma_producto <- function() {
+  # vector para almacenar los números
+  numeros <- numeric(5)
+
+  cat("Por favor, introduce cinco números:\n")
+  for(i in 1:5) {
+    numeros[i] <- as.numeric(readline(sprintf("Número %d: ", i)))
+  }
+  
+  # menu
+  cat("\nOperaciones disponibles:\n")
+  cat("1. Suma\n")
+  cat("2. Producto\n")
+
+  opcion <- as.numeric(readline("Elige una opción (1 o 2): "))
+
+  if(opcion == 1) {
+    resultado <- sum(numeros)
+    cat("\nLa suma de los números es:", resultado, "\n")
+  } else if(opcion == 2) {
+    resultado <- prod(numeros)
+    cat("\nEl producto de los números es:", resultado, "\n")
+  } else {
+    cat("\nOpción no válida. Por favor, elige 1 o 2.\n")
+    return(NULL)
+  }
+  
+  return(resultado)
 }
