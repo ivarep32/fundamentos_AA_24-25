@@ -234,3 +234,70 @@ tabla <- data.frame(
 )
 
 print(round(tabla, 4))
+
+#-----------------------------------------------------------
+#Contexto teórico
+#-----------------------------------------------------------
+# En regresión lineal múltiple, se desea construir intervalos de confianza
+# para cada parámetro β̂ᵢ del modelo:
+#
+#   ( β̂ᵢ ± t_{n-p, α/2} · σ̂ · sqrt[(X'X)^(-1)ᵢᵢ] )
+#
+# Donde:
+# - β̂ᵢ: estimación del parámetro
+# - t_{n-p, α/2}: cuantil de la t de Student con (n - p) grados de libertad
+# - σ̂²: varianza residual estimada
+# - (X'X)^(-1): inversa de la matriz de diseño
+#-----------------------------------------------------------
+#-----------------------------------------------------------
+# Estimación de intervalos de confianza al 95% para los coeficientes
+# según el modelo ajustado sobre los datos "savings"
+#-----------------------------------------------------------
+
+# Recordamos que z es el modelo ajustado:
+# z <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+
+# Extraemos la matriz del diseño del modelo
+X <- model.matrix(z)
+n <- nrow(X)
+p <- ncol(X)
+
+# Obtenemos la inversa de X'X
+XtXi <- solve(t(X) %*% X)
+
+# Estimación puntual de los coeficientes
+beta <- coef(z)
+
+# Varianza residual (sigma^2)
+y <- savings$sr
+RSS <- t(y - X %*% beta) %*% (y - X %*% beta)
+sigma2 <- RSS / (n - p)
+
+#-----------------------------------------------------------
+# Cálculo de errores típicos de los coeficientes
+#-----------------------------------------------------------
+ET <- sqrt(rep(sigma2, length(diag(XtXi))) * diag(XtXi))
+
+#-----------------------------------------------------------
+# Cuantil t para nivel de confianza 95%
+#-----------------------------------------------------------
+niv <- 0.95
+t <- qt(1 - (1 - niv)/2, n - p)
+
+#-----------------------------------------------------------
+# Cálculo de los intervalos de confianza
+#-----------------------------------------------------------
+
+#--- Extremos inferiores de los intervalos de confianza
+betainf <- beta - t * ET
+
+#--- Extremos superiores de los intervalos de confianza
+betasup <- beta + t * ET
+
+# Mostramos los resultados
+betainf
+betasup
+#-----------------------------------------------------------
+# Verificación con confint()
+#-----------------------------------------------------------
+confint(z, level = niv)
