@@ -153,3 +153,84 @@ summary(modelo_parcial)
 
 m0 <- lm(IN ~ Anio - 1, datos_real)
 summary(m0)
+
+#-----------------------------------------------------------
+# SECCIÓN 4 - Coeficientes de correlación simple, múltiple y parcial
+#-----------------------------------------------------------
+# Calculamos la matriz de correlación simple entre todas las variables del dataset.
+# La correlación simple entre dos variables mide la intensidad y dirección de la relación lineal.
+# El valor está en [-1, 1], y su signo coincide con el del coeficiente de regresión simple.
+#-----------------------------------------------------------
+
+correlaciones_simples <- cor(datos_real)
+print(correlaciones_simples)
+
+# Podemos extraer la fila o columna correspondiente a IN (Inversión)
+correlaciones_IN <- correlaciones_simples["IN", ]
+print(correlaciones_IN)
+
+#-----------------------------------------------------------
+#Correlación múltiple
+#-----------------------------------------------------------
+# El coeficiente de correlación múltiple entre una variable respuesta (IN)
+# y un conjunto de variables explicativas (Anio, PNB, IPC, TI) se define como:
+#
+# Corr(IN, Ŷ), donde Ŷ = predicciones del modelo de regresión múltiple.
+# Su cuadrado coincide con el R² del modelo de regresión múltiple.
+#Comentario: Esta medida nos dice qué tan bien se ajustan las predicciones
+# del modelo a la inversión observada. Cuanto más cercana a 1, mejor
+# explicación conjunta.
+#-----------------------------------------------------------
+
+correlacion_multiple <- cor(datos_real$IN, fitted(m2))
+print(correlacion_multiple)
+
+# Verifica que el cuadrado de este valor es igual a Multiple R-squared:
+summary(m2)$r.squared  # Debe coincidir con correlacion_multiple^2
+
+#-----------------------------------------------------------
+# Correlación parcial
+#-----------------------------------------------------------
+# Calculamos la correlación entre los residuos de IN y cada variable,
+# después de eliminar el efecto de las demás. Esto nos da la influencia neta.
+#-----------------------------------------------------------
+
+# Residuos de IN y cada variable, controlando por las otras
+r_IN_Anio <- residuals(lm(IN ~ PNB + IPC + TI, data = datos_real))
+r_Anio    <- residuals(lm(Anio ~ PNB + IPC + TI, data = datos_real))
+
+r_IN_PNB  <- residuals(lm(IN ~ Anio + IPC + TI, data = datos_real))
+r_PNB     <- residuals(lm(PNB ~ Anio + IPC + TI, data = datos_real))
+
+r_IN_IPC  <- residuals(lm(IN ~ Anio + PNB + TI, data = datos_real))
+r_IPC     <- residuals(lm(IPC ~ Anio + PNB + TI, data = datos_real))
+
+r_IN_TI   <- residuals(lm(IN ~ Anio + PNB + IPC, data = datos_real))
+r_TI      <- residuals(lm(TI ~ Anio + PNB + IPC, data = datos_real))
+
+# Correlaciones parciales entre residuos
+correlaciones_parciales <- c(
+  Anio = cor(r_IN_Anio, r_Anio),
+  PNB  = cor(r_IN_PNB,  r_PNB),
+  IPC  = cor(r_IN_IPC,  r_IPC),
+  TI   = cor(r_IN_TI,   r_TI)
+)
+# Resultado esperado: El valor de la correlación parcial entre IN y
+# Anio debe ser negativo (~ -0.94), a pesar de que su correlación
+# simple era positiva. Esto evidencia un cambio de signo típico del
+# fenómeno de confusión
+
+#-----------------------------------------------------------
+# Tabla resumen: Correlaciones simples vs. parciales
+#-----------------------------------------------------------
+# Esta tabla permite comparar la relación directa y la neta
+# de cada variable con la inversión (IN). El cambio de signo
+# indica un posible efecto de confusión entre variables.
+#-----------------------------------------------------------
+
+tabla <- data.frame(
+  Correlacion_Simple  = correlaciones_IN[c("Anio", "PNB", "IPC", "TI")],
+  Correlacion_Parcial = correlaciones_parciales
+)
+
+print(round(tabla, 4))
