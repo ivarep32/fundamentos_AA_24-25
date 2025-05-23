@@ -94,3 +94,37 @@ summary(z)$r.squared       # R^2 con Newspaper
 # valor explicativo y puede ser eliminado.
 
 
+# #---------------------------------------------------------------------------------------------
+# 1.3 Prediccion
+# - Una vez ajustado el modelo, podemos usarlo para predecir el valor de la variable respuesta
+#   (Sales) dados nuevos valores de las variables predictoras (TV y Radio).
+
+# - La función predict() permite hacer:
+#   a) predicciones puntuales (valor estimado),
+#   b) intervalos de confianza para la media de la predicción,
+#   c) intervalos de predicción para una nueva observación.
+
+# - predict(z2, newdata): devuelve la predicción puntual ŷ para los valores en newdata.
+
+# - predict(z2, newdata, interval = "confidence"):
+#   devuelve un intervalo que contiene, con determinada probabilidad (por defecto 95%),
+#   la media de las respuestas para esas condiciones.
+
+# - predict(z2, newdata, interval = "predict"):
+#   devuelve un intervalo más amplio que contiene una posible nueva observación de Y
+#   para esas condiciones, teniendo en cuenta la variabilidad del error.
+
+#---------------------------------------------------------------------------------------------
+# Supongamos que un mercado invierte $100,000 en TV y $20,000 en Radio.
+
+# Creamos el data.frame con estos valores y usamos predict():
+newdata <- data.frame(TV = 100, Radio = 20)
+
+# Predicción puntual
+predict(z2, newdata)
+
+# Intervalo de confianza (estimación del valor medio esperado)
+predict(z2, newdata, interval = "confidence")
+
+# Intervalo de predicción (valor observado nuevo con error)
+predict(z2, newdata, interval = "predict")
