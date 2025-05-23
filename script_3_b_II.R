@@ -177,3 +177,43 @@ cat(sprintf(" Solución final: x = (%.6f, %.6f)\n", x[1], x[2]))
 # - Si β es muy pequeño, se reducen mucho los pasos → lento pero seguro.
 # - Puedes probar diferentes combinaciones para ver cómo afecta la convergencia.
 
+#----------------------------------------------------------------------------------------------------------------------
+# 1.2 Demostración  del  algoritmo  de  descenso  de  gradiente
+# Visualización del descenso de gradiente con 'grad.desc':
+# - La función grad.desc() genera una animación paso a paso del algoritmo.
+# - Muestra cómo el punto se mueve en la superficie de la función hasta alcanzar el mínimo.
+# - Es útil para entender cómo el paso (gamma) afecta a la velocidad y trayectoria de convergencia.
+# - init: vector con el punto inicial (x0, y0).
+# - gamma: tamaño del paso (learning rate); si es muy grande, puede rebotar; si es muy pequeño, avanza lento.
+
+# Puedes experimentar cambiando 'gamma' o el punto inicial para observar diferentes comportamientos.
+
+#----------------------------------------------------------------------------------------------------------------------
+
+# Cargar el paquete 'animation' para visualización animada
+# Si no está instalado, debes ejecutar primero:install.packages("animation")
+# a poder ser en los servidores de austria (si Manuel Febrero es tu profesor
+# ya sabrás porqué)
+library(animation)
+
+# Configuramos los parámetros de la animación
+# - interval: tiempo entre fotogramas (en segundos)
+# - nmax: número máximo de iteraciones que mostrará la animación
+ani.options(interval = 0.3, nmax = 50)
+
+# Definimos la función a minimizar
+# f(x, y) = 1/2 (x^2 + 2y^2)
+fun_obj <- function(x, y) 0.5 * (x^2 + 2 * y^2)
+
+# Ejecutamos la animación del descenso de gradiente
+# - FUN: función objetivo
+# - init: punto inicial
+# - gamma: tasa de aprendizaje (paso fijo)
+result <- grad.desc(FUN = fun_obj, init = c(2, 1), gamma = 0.2)
+
+# Imprime la solución final encontrada
+result$par
+
+#Visualiza la trayectoria sobre la superficie 3D de la función
+result$persp(col = "lightblue", phi = 30)
+
