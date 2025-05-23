@@ -19,9 +19,9 @@ library(GGally)
 ggpairs(savings) + theme_bw()
 
 #Ajuste modelo regrsion lineal multiple
-z <- lm(savings$sr ~ savings$pop15 + savings$pop75 + savings$dpi + savings$ddpi)
+modelo <- lm(savings$sr ~ savings$pop15 + savings$pop75 + savings$dpi + savings$ddpi)
 
-summary(z)
+summary(modelo)
 
 # El resumen proporciona:
 # - Coeficientes estimados (β̂)
@@ -36,7 +36,7 @@ summary(z)
 #-----------------------------------------------------------
 # Sección 1.1: Estimación de los parámetros del modelo
 #-----------------------------------------------------------
-beta <- coef(z)
+beta <- coef(modelo)
 
 #matriz del diseño
 X <- model.matrix(z)
@@ -61,6 +61,29 @@ y <- savings$sr
 hbeta <- XtXi %*% t(X) %*% y
 hbeta  # debe coincidir con coef(modelo)
 
+# Matriz generadora de residuos: M = I - H
+M <- diag(1, n) - H
+
+# Residuos estimados: ε̂ = M * Y
+residuos <- M %*% y
+
+# También se pueden obtener con:
+residuals(modelo)
+
+#-----------------------------------------------------------
+# Sección 2: Estimación de la varianza
+# Para estimar la varianza del error σ² se utiliza:
+# σ̂² = RSS / (n - p), donde RSS = ∑(ε̂i)² = ε̂'ε̂ = Y'MY
+#-----------------------------------------------------------
+# Cálculo de RSS (Residual Sum of Squares)
+RSS <- t(y - X %*% hbeta) %*% (y - X %*% hbeta)
+
+# Equivalente con función deviance:
+deviance(modelo)
+
+# Varianza estimada del error
+sigma2 <- RSS / (n - p)
+sigma2
 
 
 
