@@ -128,3 +128,82 @@ predict(z2, newdata, interval = "confidence")
 
 # Intervalo de predicción (valor observado nuevo con error)
 predict(z2, newdata, interval = "predict")
+
+#--------------------------------------------------------------
+# 2. Ajuste de los parámetros de un modelo de regresión
+# lineal mediante  métodos  de  optimización
+#--------------------------------------------------------------
+
+# 🎲 Simulación de datos para un modelo de regresión lineal simple
+
+# - Simulamos un conjunto de datos para observar cómo funciona el ajuste mediante
+# descenso de gradiente.
+# - El modelo es: y = β0 + β1x + ε, donde:
+#   - x es generado de forma aleatoria (distribución uniforme)
+#   - ε es un término de error aleatorio con distribución normal
+#   - β0 y β1 son los parámetros reales del modelo
+
+# - Estos datos simulan una situación en la que conocemos los parámetros reales,
+#   lo que nos permite evaluar la precisión del ajuste manual.
+
+set.seed(123)  # Fijamos semilla para reproducibilidad
+n <- 100
+x <- runif(n, min = 0, max = 5)
+beta0 <- 2
+beta1 <- 5
+epsilon <- rnorm(n, sd = 1)
+y <- beta0 + beta1 * x + epsilon
+
+# Visualizamos los datos simulados
+plot(x, y, main = "Datos simulados para regresion lineal simple", xlab = "x", ylab = "y")
+
+# ✅ Ajuste del modelo mediante mínimos cuadrados con lm()
+
+# - Esta es la solución exacta calculada por R utilizando álgebra matricial.
+# - Nos servirá como referencia para comparar con los métodos iterativos.
+
+modelo_ref <- lm(y ~ x)
+coef(modelo_ref)
+
+#---------------------------------------------------------------------------------------
+# implementacion del metodo de descenso del gradiente
+# - Este metodo consiste en actualizar iterativamente los parámetros β0 y β1
+#   para minimizar la función de coste J(β0, β1), basada en el error cuadrático medio.
+
+# - Fórmulas:
+#   β0 ← β0 + t * ∑(yᵢ - (β0 + β1 * xᵢ))
+#   β1 ← β1 + t * ∑(xᵢ * (yᵢ - (β0 + β1 * xᵢ)))
+
+# - Donde:
+#   - t es la tasa de aprendizaje (learning rate)
+#   - El proceso se repite un número fijo de iteraciones o hasta converger
+
+# - Es importante elegir bien la tasa de aprendizaje:
+#   - Si es muy grande, el algoritmo puede divergir.
+#   - Si es muy pequeña, la convergencia puede ser muy lenta.
+
+---------------------------------------------------------------------------------------
+
+b0 <- 0
+b1 <- 0
+
+# Parámetros de control más robustos
+t <- 0.001             # Tasa de aprendizaje inicial
+max_iter <- 1000       # Máximo número de iteraciones
+tolerance <- 1e-6      # Criterio de convergencia
+# Inicialización de parámetros
+#b0 <- 0
+#b1 <- 0
+#t <- 0.001       # Tasa de aprendizaje
+#iter <- 1000     # Número de iteraciones
+
+# Iteraciones del descenso de gradiente (batch)
+for (i in 1:iter) {
+  y_pred <- b0 + b1 * x
+  error <- y - y_pred
+  b0 <- b0 + t * sum(error)
+  b1 <- b1 + t * sum(x * error)
+}
+
+# Coeficientes estimados por el metodo batch
+c(b0, b1)
