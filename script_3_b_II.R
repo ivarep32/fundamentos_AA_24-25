@@ -43,10 +43,8 @@ x  # Solución final
 
 # Definimos el valor de γ
 gamma <- 2
-
 # Punto inicial
 x <- c(gamma, 1)
-
 # Parámetros de control
 eta <- 1e-6            # Criterio de convergencia
 max_iter <- 1000       # Iteraciones máximas
@@ -56,19 +54,17 @@ trajectory_exact <- matrix(NA, nrow = max_iter, ncol = 2)
 for (k in 1:max_iter) {
   grad <- c(x[1], gamma * x[2])
   direction <- -grad
-
   #Paso exacto: t = (∇f)^T ∇f / (d^T H d)
   # En nuestro caso, H es diagonal: diag(1, γ^2)
   num <- sum(grad^2)
   denom <- sum(c(1, gamma^2) * direction^2)
   t_exact <- num / denom
-
   x_new <- x + t_exact * direction
   trajectory_exact[k, ] <- x_new
-
   if (sqrt(sum((x_new - x)^2)) < eta) break
   x <- x_new
 }
+
 # Coordenadas del mínimo
 x
 
@@ -81,12 +77,22 @@ cat("Con γ = 1, iteraciones necesarias:", k, "\n")
 
 #Pregunta 2: velocidad de convergencia para distintos valores de γ
 convergencia_por_gamma <- function(gamma) {
+  # Definimos las variables necesarias dentro de la función
+  max_iter <- 1000
+  eta <- 1e-6
   x <- c(gamma, 1)
+  
   for (k in 1:max_iter) {
     grad <- c(x[1], gamma * x[2])
     direction <- -grad
     t_exact <- sum(grad^2) / sum(c(1, gamma^2) * direction^2)
     x_new <- x + t_exact * direction
+    
+    # Añadimos validación para evitar NAs
+    if (is.na(sum((x_new - x)^2))) {
+      return(max_iter)
+    }
+    
     if (sqrt(sum((x_new - x)^2)) < eta) break
     x <- x_new
   }
@@ -100,4 +106,3 @@ iters <- sapply(gammas, convergencia_por_gamma)
 # Mostrar resultados
 comparacion <- data.frame(gamma = gammas, iteraciones = iters)
 print(comparacion)
-
