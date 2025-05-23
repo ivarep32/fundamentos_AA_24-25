@@ -425,3 +425,60 @@ concatenar_ordenar_listas <- function(lista1, lista2) {
   # d) Devolver la lista ordenada
   return(lista_ordenada)
 }
+
+#Desarrolla una función en R llamada cambiar_letras que reciba una cadena de caracteres que represente
+# una frase en cualquier formato. La función deberá devolver la misma frase, pero cambiando la primera
+# letra de cada palabra a mayúscula si es minúscula, a minúscula si es mayúscula, y no realizar ningún
+# cambio si es un dígito. Además, el resto de los caracteres deberán ser devueltos en minúsculas.
+#El  programa  deberá:
+#a)    Iterar  sobre  cada  palabra  de  la  frase.
+#b)    Veriﬁcar  si  la  palabra  ocupa  un  lugar  impar  en  la  frase  o  si  tiene  un  número  impar  de letras.
+#c)    Modiﬁcar  las  letras  según  las  reglas  especiﬁcadas.
+#d)    Devolver  la  frase  modiﬁcada  como  resultado.
+#El   programa   debe   ser   capaz   de   manejar   frases   en   cualquier   formato   y   garantizar   que
+# se realicen  los  cambios  de  manera  adecuada.
+cambiar_letras <- function(frase){
+  #validar entrada
+  if(!is.character(frase) || length(frase) !=1){
+    stop("La entrada debe ser la unica cadena de caracteres")
+  }
+  # dividir la frase en palabras
+  palabras <- strsplit(frase, "\\s+")[[1]]
+  #procesar la palabra
+  palabras_modificadas <- vector("character", length(palabras))
+
+  for(i in seq_along(palabras)){
+    palabra <- palabras[i]
+    if (nchar(palabra)>0){
+      #verificar si la posicion es impar o si
+      #la palabra tiene longitud impar
+      es_impar <- (i%%2==1) || (nchar(palabra)%%2==1)
+
+      #sacar la primera letra
+      primera_letra <- substr(palabra,1,1)
+      resto <- tolower(substr(palabra,2,nchar(palabra)))
+
+      #modificar
+      if(grepl("^[0-9]", primera_letra)){
+        #si es digito mantener igual
+        primera <- primera_letra
+      }
+      else if(es_impar){
+        #si es posicion impar o longitud impar
+        primera <- if(primera_letra == toupper(primera_letra)){
+          tolower(primera_letra)
+        }else{
+          toupper(primera_letra)
+        }
+      }else{
+        #si es posicion par y longitud par
+        primera <- primera_letra
+      }
+      #unir la palabra
+      palabras_modificadas[i] <- paste0(primera, resto)
+    }else{
+      palabras_modificadas[i] <- palabra
+    }
+  }
+  return(paste(palabras_modificadas, collapse = " "))
+}
