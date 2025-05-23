@@ -182,20 +182,13 @@ coef(modelo_ref)
 #   - Si es muy grande, el algoritmo puede divergir.
 #   - Si es muy pequeña, la convergencia puede ser muy lenta.
 
----------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
 
+# Inicialización de parámetros
 b0 <- 0
 b1 <- 0
-
-# Parámetros de control más robustos
-t <- 0.001             # Tasa de aprendizaje inicial
-max_iter <- 1000       # Máximo número de iteraciones
-tolerance <- 1e-6      # Criterio de convergencia
-# Inicialización de parámetros
-#b0 <- 0
-#b1 <- 0
-#t <- 0.001       # Tasa de aprendizaje
-#iter <- 1000     # Número de iteraciones
+t <- 0.001       # Tasa de aprendizaje
+iter <- 1000     # Número de iteraciones
 
 # Iteraciones del descenso de gradiente (batch)
 for (i in 1:iter) {
