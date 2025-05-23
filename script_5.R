@@ -45,3 +45,16 @@ hbeta <- XtXi %*% t(X) %*% Y
 # verificamos que coincide con coef(z)
 hbeta
 
+#-----------------------------------------------------------
+# 4. Estimación de la varianza del error
+#-----------------------------------------------------------
+# Matriz generadora de residuos: M = I - H
+M <- diag(1, nrow=n) - H
+
+# Suma residual de cuadrados (RSS)
+RSS <- t(Y - X %*% hbeta) %*% (Y - X %*% hbeta)
+
+# Varianza residual estimada σ̂² = RSS / (n - p)
+sigma2 <- RSS / (n - p)
+sigma2
+
