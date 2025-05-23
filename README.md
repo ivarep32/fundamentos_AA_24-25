@@ -1,21 +1,57 @@
-Evidentemente es posible que necesites mover el Working Directory del script cuando lo abras en tu ordenador para poder trabajar con los datasets.
+# 📘 Fundamentos de Análisis con R – Scripts de Clase
 
-Si usas RStudio: Session > Set Working Directory > Choose Directory y ya pones la localizacion de tus archivos de datos.
+Este repositorio contiene scripts asociados a las sesiones prácticas de la asignatura de fundamentos del aprendizaje automatico (curso 24/25 del GrIA en la USC) . Aquí tienes instrucciones para trabajar con los archivos correctamente, algunas recomendaciones, y una tabla que relaciona cada script con su sesión correspondiente.
 
-Tambien es posible que los archivos cambien pero simplemente modifica el codigo en local para cambiar los archivos.
+---
 
-Buena suerte con esta asignatura, al menos ya no os dará clase MJ Ginzo.
+## 📑 Índice
 
-AH! y practicamente todos los comentarios están hechos por chatgpt que es un mejor profesor de fundamentos que yo y seguro que se explica mejor
+- [⚙️ Configura tu entorno de trabajo](#️-configura-tu-entorno-de-trabajo)
+- [🍀 Consejos y mensajes del autor](#-consejos-y-mensajes-del-autor)
+- [🚀 Recomendación de IDE](#-recomendación-de-ide)
+- [📂 Relación de scripts con sesiones](#-relación-de-scripts-con-sesiones)
 
-Me gustaria tomarme el momento de publicitar a JetBrains y deciros que useis PyCharm para todo y para las cosas de R DataSpell. Aprovechad que se os da licencia de uso gratuita por ser estudiantes :>
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Relacion scripts - pdfs/sesiones:
+---
 
-script 1 -> S1_AA_IA_2425 (Boletín  1.  Introducción  al  Paquete  R Introducción  al  Paquete  R  -  Grado  en  Inteligencia  Artiﬁcial)
-script 2 -> S2_AA_IA_2225 (Boletín  2.  Programación  con  R Programación  con  R  -  Grado  en  Inteligencia  Artiﬁcial)
-script 3 -> S3_AA_IA_2425_1 (Análisis de Componentes Principales con R Introducción - Grado en Inteligencia Artiﬁcial)
-script 3_b -> S3_AA_IA_2425_2 (Análisis  de  Regresión  con  R Introducción - Grado en Inteligencia Artiﬁcial)
-script 3_b_II -> S3_AA_IA_2425_2_1 (Análisis  de  Regresión  con  R Introducción  -  Grado  en  Inteligencia  Artiﬁcial)
-script 4 -> MetodoRemuestreo (Un  método  de  remuestreo  para  la  regresión  lineal  simple Grado  en  Inteligencia  Artiﬁcial) [BOOTSRAP]
-script 5 -> S5_AA_IA_2425 (Análisis  de  Regresión  Lineal  General  con  R Introducción  -  Grado  en  Inteligencia  Artiﬁcial)
+## ⚙️ Configura tu entorno de trabajo
+
+> Es posible que necesites **mover el directorio de trabajo (Working Directory)** cuando abras un script en tu ordenador para que pueda acceder correctamente a los datasets.
+
+### Si usas RStudio:
+- Ve a `Session > Set Working Directory > Choose Directory`
+- Selecciona la carpeta donde tienes los archivos de datos
+
+Si los archivos cambian de nombre o ubicación, **simplemente actualiza las rutas en el código localmente**.
+
+---
+
+## 🍀 Consejos y mensajes del autor
+
+- ¡Buena suerte con esta asignatura!
+- Al menos ya **no os dará clase MJ Ginzo** 😅
+- **Casi todos los comentarios de los scripts fueron generados con ChatGPT**, que sinceramente **explica mejor fundamentos que yo** 😅
+
+---
+
+## 🚀 Recomendación de IDE
+
+> Quiero aprovechar este momento para recomendar:
+
+- **PyCharm** para Python
+- **DataSpell** para trabajar con R
+
+Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita**. ¡Aprovechadlo! 💡
+
+---
+
+## 📂 Relación de scripts con sesiones
+
+| Script         | Archivo relacionado             | Contenido del boletín / sesión                                                                 |
+|----------------|----------------------------------|-----------------------------------------------------------------------------------------------|
+| `script 1`     | `S1_AA_IA_2425`                  | Boletín 1: Introducción al Paquete R                                                          |
+| `script 2`     | `S2_AA_IA_2225`                  | Boletín 2: Programación con R                                                                 |
+| `script 3`     | `S3_AA_IA_2425_1`                | Análisis de Componentes Principales con R (Introducción)                                     |
+| `script 3_b`   | `S3_AA_IA_2425_2`                | Análisis de Regresión con R (Parte I)                                                         |
+| `script 3_b_II`| `S3_AA_IA_2425_2_1`              | Análisis de Regresión con R (Parte II)                                                        |
+| `script 4`     | `MetodoRemuestreo`               | Método de remuestreo para regresión lineal simple *(Bootstrap)*                              |
+| `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
