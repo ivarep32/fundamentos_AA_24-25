@@ -78,3 +78,19 @@ RSE
 
 # Intervalos de confianza al 90% para los coeficientes
 confint(z, level = 0.9)
+
+#-------------------------------------------------------
+#1.2 Contrastes  sobre  los  parámetros  del  modelo
+#-------------------------------------------------------
+# El p-valor del F-test (resumen del modelo) indica si al menos una variable es útil.
+# La variable Newspaper no es significativa (p ≈ 0.86), así que ajustamos un nuevo modelo:
+z2 <- lm(Sales ~ TV + Radio, data = Advertising)
+
+# Comparamos los R^2
+summary(z2)$r.squared      # R^2 sin Newspaper
+summary(z)$r.squared       # R^2 con Newspaper
+# ✅ Conclusión:
+# El modelo sin Newspaper tiene prácticamente el mismo R^2, por lo tanto Newspaper no aporta
+# valor explicativo y puede ser eliminado.
+
+
