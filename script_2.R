@@ -162,6 +162,50 @@ cinco <- function(){
 #d) Si  lo  es,  agregar  el  número  a  una  lista  de  números  que  cumplen  la  condición.
 #e) Finalmente,  imprimir  la  lista  de  números  encontrados  que  cumplen  con  la  condición.
 
-numeros_especiales <- function(){
-
+numeros_especiales <- function() {
+  # Vector para almacenar los números que cumplen la condición
+  numeros_encontrados <- c()
+  
+  # Función auxiliar para sumar las cifras de un número
+  suma_cifras <- function(n) {
+    digitos <- as.character(n)
+    digitos <- strsplit(digitos, "")
+    digitos <- as.numeric(digitos[[1]])
+    return(sum(digitos))
+  }
+  
+  # Función auxiliar para verificar si un número es cuadrado perfecto
+  es_cuadrado_perfecto <- function(n) {
+    raiz <- sqrt(n)
+    return(all.equal(raiz, round(raiz), tolerance = 1e-10) == TRUE)
+  }
+  
+  # Iterar sobre los números del 1 al 999
+  for(i in 1:999) {
+    tryCatch({
+      cubo <- i^3
+      suma <- suma_cifras(cubo)
+      if(es_cuadrado_perfecto(suma)) {
+        numeros_encontrados <- c(numeros_encontrados, i)
+      }
+    }, error = function(e) {
+      cat("Error procesando número:", i, "\n")
+    })
+  }
+  
+  # Imprimir resultados
+  if(length(numeros_encontrados) > 0) {
+    cat("\nNúmeros encontrados que cumplen la condición:\n")
+    for(num in numeros_encontrados) {
+      cubo <- num^3
+      suma <- suma_cifras(cubo)
+      raiz <- round(sqrt(suma))
+      cat(sprintf("Número: %d\n  Su cubo: %d\n  Suma de cifras: %d\n  Es cuadrado perfecto: %d^2 = %d\n\n",
+                  num, cubo, suma, raiz, suma))
+    }
+  } else {
+    cat("No se encontraron números que cumplan la condición.\n")
+  }
+  
+  return(numeros_encontrados)
 }
