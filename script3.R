@@ -98,3 +98,68 @@ biplot(test.pca)
 # - Un punto muy alejado en la dirección de la primera componente puede indicar un alumno
 #   sobresaliente o con bajo rendimiento general (según el signo).
 
+#-------------------------------------------------------------
+#Las  componentes  principales  y  los  cambios  de  escala
+#-------------------------------------------------------------
+# ⚠️ Importancia de la escala en PCA:
+# El PCA se basa en la varianza de las variables. Si las variables tienen escalas diferentes,
+# las de mayor escala dominarán la primera componente principal.
+
+# Para evitar este sesgo, podemos estandarizar las variables, es decir:
+# - Restar la media.
+# - Dividir por la desviación estándar.
+# Esto equivale a usar la matriz de correlaciones en lugar de la de covarianzas.
+
+# EJERCICIOS
+
+# 1. Realiza un Análisis de Componentes Principales con los datos de decatlón.
+# Justifica el uso de la matriz de covarianzas o de la matriz de correlaciones
+# muestrales para llevar a cabo el análisis.
+
+# Leer los datos del archivo
+deca <- read.table("decatlon.txt", header = TRUE)
+
+# Verificar las escalas de las variables
+summary(deca)
+
+#Como las variables representan distintas pruebas físicas
+# (con unidades diferentes: segundos, metros, puntos), tienen escalas muy distintas.
+#Por tanto, debemos usar la matriz de correlaciones → esto se hace con cor = TRUE.
+# Análisis PCA con variables estandarizadas
+pca.deca <- princomp(deca, cor = TRUE)
+summary(pca.deca)
+
+#2.Haz una interpretación de las dos primeras componentes principales.
+#¿Cuál es la proporción de variabilidad explicada por las dos primeras componentes
+# principales?
+
+summary(pca.deca)
+
+#Interpretación:
+
+#La primera componente (Comp.1) explica el 61.8% de la variabilidad total.
+#Esta suele estar asociada a un rendimiento físico general.
+
+#La segunda componente (Comp.2) explica el 23.6% adicional, llegando a un total
+# de 85.4% acumulado.
+
+#Para interpretar qué representa cada componente:
+# Cargarings (autovectores) de las variables
+pca.deca$loadings
+
+# 3.Realiza el biplot correspondiente y comenta la gráfica obtenida.
+biplot(pca.deca)
+
+#Los puntos representan los participantes. Si están juntos, tienen perfiles similares.
+
+#Las flechas son las variables. Las variables con flechas en la misma dirección
+# están correlacionadas positivamente.
+
+#Si un grupo de variables apunta en la misma dirección que una nube de puntos,
+# esos participantes destacan en esas pruebas.
+
+# RESPUESTA ANALISIS: En el biplot observamos que los participantes con altas
+# puntuaciones en X100, X400 y X110 están agrupados y alineados con esas variables.
+# Esto sugiere que la primera componente principal refleja el rendimiento en velocidad.
+# Por otro lado, jave y disq apuntan en dirección perpendicular, indicando un eje
+# independiente relacionado con fuerza/lanzamientos.
