@@ -68,5 +68,33 @@ v <- auto$vectors # Autovectores (direcciones de las componentes)
 lambda / sum(lambda) # Proporción de varianza explicada
 cumsum(lambda / sum(lambda)) # Proporción acumulada
 
+#-------------------------------------------------------------------------------
+# EL BIPLOT
+#Un biplot es una representación en el plano definido por las dos primeras
+# componentes principales:
+#Cada punto representa una observación (aspirante).
+#Cada flecha representa una variable original (asignatura).
+#Esto permite: Ver grupos de individuos con perfiles similares.
+#Identificar correlaciones entre variables (ángulos pequeños entre flechas).
+#Interpretar qué variables explican mejor la variabilidad de los datos
+#-------------------------------------------------------------------------------
 
+biplot(test.pca)
+
+# Interpretación del biplot:
+# El gráfico muestra los dos primeros componentes principales:
+# Comp.1 (eje horizontal) y Comp.2 (eje vertical).
+
+# - Puntos cercanos entre sí: los aspirantes tienen puntuaciones similares en las materias.
+# - Puntos alineados con una flecha: ese aspirante tiene puntuaciones altas en esa materia.
+# - Flechas con ángulos pequeños: materias positivamente correlacionadas.
+# - Flechas en direcciones opuestas (ángulo ~180°): materias negativamente correlacionadas.
+
+# Ejemplo específico:
+# - Si prog, ingcom, ingsof, etc., apuntan todas hacia la misma dirección, indica
+#   que las asignaturas están positivamente correlacionadas.
+# - Si la primera componente tiene todos los coeficientes positivos y explica >80% de la varianza,
+#   probablemente representa la “nota global” del alumno.
+# - Un punto muy alejado en la dirección de la primera componente puede indicar un alumno
+#   sobresaliente o con bajo rendimiento general (según el signo).
 
