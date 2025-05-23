@@ -40,6 +40,33 @@ test.pca$scores
 # ------------------------------------------------------------------------------------
 # Análisis   de   componentes   principales   a   través   de   la   descomposición
 # espectral  de  la  matriz  de  covarianzas
+
+#Esta parte te muestra cómo calcular el PCA “desde cero” usando las funciones cov()
+# y eigen(), para confirmar y entender mejor los resultados de princomp().
 #--------------------------------------------------------------------------------------
+
+# Calcular el número de observaciones y medias de las variables
+#Para obtener las medias de cada variable, que luego se usan para
+# centrar los datos y calcular la matriz de covarianzas
+# .
+n <- nrow(dat)  # Número de observaciones
+apply(dat, 2, mean)  # Media de cada variable (por columnas)
+
+#Calcular la matriz de covarianzas muestral corregida
+#matriz de covarianzas muestral corregida, usada por princomp().
+# Se usa para capturar las relaciones lineales entre las variables.
+#cov(dat) usa denominador (n−1); para igualar a princomp(), se ajusta con (n−1)/n.
+
+S <- cov(dat) * (n - 1)/n  # Ajuste muestral: multiplica por (n-1)/n
+
+#Obtener autovalores y autovectores
+auto <- eigen(S) # Descomposición espectral de S
+lambda <- auto$values # Autovalores (varianzas de las componentes)
+v <- auto$vectors # Autovectores (direcciones de las componentes)
+
+#Confirmar varianza explicada y su acumulado
+lambda / sum(lambda) # Proporción de varianza explicada
+cumsum(lambda / sum(lambda)) # Proporción acumulada
+
 
 
