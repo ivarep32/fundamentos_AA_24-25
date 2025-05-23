@@ -106,3 +106,74 @@ iters <- sapply(gammas, convergencia_por_gamma)
 # Mostrar resultados
 comparacion <- data.frame(gamma = gammas, iteraciones = iters)
 print(comparacion)
+
+# 📌 Análisis de la velocidad de convergencia:
+# - Con γ = 1 → convergencia ideal: solo 1 iteración.
+# - Cuando 1/3 < γ < 3, la convergencia es bastante eficiente.
+# - Cuando γ ≪ 1 o γ ≫ 1, la función se vuelve muy elíptica, lo que hace que:
+#     - El gradiente apunte en direcciones poco útiles.
+#     - Se necesiten muchas más iteraciones para acercarse al mínimo.
+
+# Pregunta 3: Programa   el   algoritmo   utilizando   como   paso   de   cada
+# iteración   el   obtenido   por   el   metodo backtracking  line  search
+
+# 📘 Backtracking Line Search para descenso de gradiente
+# Objetivo: minimizar f(x, y) = 1/2(x^2 + γ y^2)
+
+# Parámetros del metodo
+gamma <- 2
+x <- c(gamma, 1)       # Punto inicial x(0)
+eta <- 1e-6            # Criterio de convergencia
+max_iter <- 1000       # Número máximo de iteraciones
+
+alpha <- 0.3           # Parámetro de control (0, 0.5]
+beta <- 0.8            # Factor de reducción (0, 1)
+trajectory_bt <- matrix(NA, nrow = max_iter, ncol = 2)
+
+# Función objetivo
+f <- function(x) {
+  0.5 * (x[1]^2 + gamma * x[2]^2)
+}
+
+#Gradiente de la función
+grad_f <- function(x) {
+  c(x[1], gamma * x[2])
+}
+
+# Bucle del algoritmo con backtracking
+for (k in 1:max_iter) {
+  grad <- grad_f(x)
+  direction <- -grad         # Dirección descendente
+  t <- 1                     # Paso inicial
+
+  # Backtracking line search
+  while (f(x + t * direction) > f(x) + alpha * t * sum(grad * direction)) {
+    t <- beta * t
+  }
+
+  x_new <- x + t * direction
+  trajectory_bt[k, ] <- x_new
+
+  # Criterio de parada
+  if (sqrt(sum((x_new - x)^2)) < eta) {
+    cat(sprintf("Convergencia con backtracking en %d iteraciones\n", k))
+    x <- x_new
+    break
+  }
+
+  x <- x_new
+}
+
+# Solución final
+cat(sprintf(" Solución final: x = (%.6f, %.6f)\n", x[1], x[2]))
+
+# 📌 Sobre el metodo de backtracking line search:
+# - Se usa cuando no se conoce el paso óptimo exacto.
+# - Permite adaptar dinámicamente la longitud del paso para asegurar descenso suficiente.
+# - Los parámetros α y β controlan la "agresividad" del metodo:
+#     - α: cuánto descenso mínimo se espera (típicamente entre 0.1 y 0.3)
+#     - β: cuánto se reduce el paso en cada intento (típicamente entre 0.5 y 0.9)
+# - Si α es muy pequeño, se acepta cualquier paso, aunque no sea eficiente.
+# - Si β es muy pequeño, se reducen mucho los pasos → lento pero seguro.
+# - Puedes probar diferentes combinaciones para ver cómo afecta la convergencia.
+
