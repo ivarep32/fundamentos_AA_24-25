@@ -236,6 +236,8 @@ tabla <- data.frame(
 print(round(tabla, 4))
 
 #-----------------------------------------------------------
+# SECCION 5 - Inferencia  sobre  los  parámetros  con  R
+#-----------------------------------------------------------
 #Contexto teórico
 #-----------------------------------------------------------
 # En regresión lineal múltiple, se desea construir intervalos de confianza
@@ -301,3 +303,83 @@ betasup
 # Verificación con confint()
 #-----------------------------------------------------------
 confint(z, level = niv)
+
+#-----------------------------------------------------------------
+# SECCION 6 - Descomposición  de  la  variabilidad.  El  test  F
+#-----------------------------------------------------------------
+# Objetivo: comparar dos modelos de regresión anidados
+# Modelo completo: sr ~ pop15 + pop75 + dpi + ddpi
+# Modelo restringido: sr ~ pop15 + pop75 + dpi  (sin ddpi)
+#-----------------------------------------------------------
+# Test F para comparar modelos de regresión anidados
+#-----------------------------------------------------------
+# Compara un modelo completo y otro restringido (con menos variables).
+#
+# H0: los coeficientes eliminados son cero (modelo restringido es válido)
+# H1: al menos uno de ellos es distinto de cero (modelo completo es mejor)
+#
+# Estadístico:
+#   F = [(RSS_restr - RSS_comp) / q] / [RSS_comp / (n - p)]
+#   Donde:
+#     - RSS: suma de residuos al cuadrado
+#     - q: nº de restricciones (coeficientes eliminados)
+#     - p: nº de parámetros del modelo completo
+#
+# Si el p-valor asociado a F es pequeño (ej. < 0.05),
+# se rechaza H0 y se concluye que las variables eliminadas son significativas.
+#
+# En R: anova(modelo_restringido, modelo_completo)
+#-----------------------------------------------------------
+
+
+# Modelo restringido: sin la variable ddpi
+z1 <- lm(sr ~ pop15 + pop75 + dpi, data = savings)
+
+# Test F usando la función anova()
+anova(z1, z)
+
+#-------------------------------
+# calculo manual del test F
+#-------------------------------
+# RSS de cada modelo
+rss0 <- deviance(z1)
+rss <- deviance(z)
+
+# Diferencia de RSS
+rss0 - rss
+
+# Cálculo manual del estadístico F
+f <- ((rss0 - rss) / 1) / (rss / (n - p))
+pvalue <- 1 - pf(f, 1, n - p)
+
+# Mostrar resultados
+f
+pvalue
+
+#-----------------------------------------------------
+#Segundo contraste (dos variables a la vez)
+#Eliminamos simultáneamente las variables pop75 y dpi
+#-----------------------------------------------------
+# Modelo completo
+z <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+
+# Modelo restringido (eliminamos pop75 y dpi)
+z2 <- lm(sr ~ pop15 + ddpi, data = savings)
+
+# Cálculo manual del test F
+rss0 <- deviance(z2)  # RSS del modelo restringido
+rss  <- deviance(z)   # RSS del modelo completo
+
+q <- 2           # nº de restricciones
+n <- nrow(model.matrix(z))
+p <- ncol(model.matrix(z))
+
+f <- ((rss0 - rss) / q) / (rss / (n - p))
+pvalue <- 1 - pf(f, q, n - p)
+
+f
+pvalue
+anova(z2, z)
+
+
+
