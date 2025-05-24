@@ -49,7 +49,7 @@ table(real=datos$Tipo, predict=prqda$class) #tabla de confusion
 #-----------------
 # KERNEL
 #-----------------
- # En el metodo del núcleo (Kernel), se estima la probabilidad condicional
+# En el metodo del núcleo (Kernel), se estima la probabilidad condicional
 # P(Y = j | X = x) como una media ponderada de las clases observadas,
 # donde los pesos se determinan según una función núcleo K y una distancia d.
 #
@@ -57,20 +57,30 @@ table(real=datos$Tipo, predict=prqda$class) #tabla de confusion
 # P(Y = j | X = x) ≈ sum_{i} 1{Yi = j} * K(h^-1 * d(x, xi)) / sum_{i} K(h^-1 * d(x, xi))
 # donde h es un parámetro de suavizado (ancho de banda).
 
-kernel_gauss <- function(d, h) {
-  exp(- (d^2) / (2 * h^2))
-}
-
+# Implementación basada en script_8.R
 classif_kernel_predict <- function(Xtrain, Ytrain, Xtest, h) {
   pred <- factor(rep(NA, nrow(Xtest)), levels = levels(Ytrain))
   for (i in 1:nrow(Xtest)) {
-    xi <- Xtest[i, ]
-    dists <- sqrt(rowSums((t(t(Xtrain) - xi))^2))
-    pesos <- kernel_gauss(dists, h)
+    # Calculamos distancias entre el punto de test y todos los de entrenamiento
+    D <- sqrt(rowSums((t(t(Xtrain) - as.numeric(Xtest[i, ])))^2))
+
+    # Aplicamos kernel gaussiano a las distancias
+    K <- dnorm(D/h)
+
+    # Normalizamos los pesos
+    if(sum(K) > 0) {
+      S <- K / sum(K)
+    } else {
+      S <- rep(1/length(K), length(K)) # Si todos son cero, damos pesos iguales
+    }
+
+    # Calculamos probabilidades por clase
     clases <- levels(Ytrain)
     probas <- sapply(clases, function(cl) {
-      sum(pesos[Ytrain == cl]) / sum(pesos)
+      sum(S[Ytrain == cl])
     })
+
+    # Asignamos la clase con mayor probabilidad
     pred[i] <- clases[which.max(probas)]
   }
   return(pred)
@@ -101,7 +111,7 @@ for (i in 1:nrep) {
   errclassif[i,2]<-mean(datos$Tipo[test]!=p_qda)
 
   # Kernel
-  Xtrain <- datos[ltrain, -1]
+ Xtrain <- datos[ltrain, -1]
   Ytrain <- datos$Tipo[ltrain]
   Xtest <- datos[test, -1]
   Ytest <- datos$Tipo[test]
@@ -114,58 +124,5 @@ for (i in 1:nrep) {
 boxplot(errclassif, ylab="Error") #comparacion grafica
 apply(errclassif, 2, quantile) #comparacion numerica
 
-# ------------------------
-# discusion de resultados
-# ------------------------
-"""
-          (con 100 tests)
-        LDA       QDA        RF
-0%   0.1029412 0.1470588 0.1470588
-25%  0.1911765 0.1911765 0.2058824
-50%  0.2205882 0.2205882 0.2352941
-75%  0.2500000 0.2500000 0.2647059
-100% 0.2941176 0.3235294 0.3529412
 
-- Para LDA el error minimo es aprox. 0.103 y el máximo 0.294
-- Para QDA el minimo es 0.147 y el maximo 0.324
-- Para RF el minimo es 0.147 y el maximo 0.353
-
-# --------------------------------------------------------------
-          (con 1000 tests)
-        LDA        QDA        RF
-0%   0.08823529 0.07352941 0.1176471
-25%  0.17647059 0.19117647 0.2058824
-50%  0.22058824 0.22058824 0.2352941
-75%  0.25000000 0.25000000 0.2647059
-100% 0.35294118 0.38235294 0.3823529
-- Para LDA el error minimo es aprox. 0.088 y el máximo 0.353
-- Para QDA el minimo es 0.074 y el maximo 0.382
-- Para RF el minimo es 0.118 y el maximo 0.382
-
-#---------------------------------------------------------------
-
-          (con 10000 tests)
-        LDA        QDA        RF
-0%   0.07352941 0.08823529 0.1029412
-25%  0.19117647 0.19117647 0.2058824
-50%  0.22058824 0.22058824 0.2352941
-75%  0.25000000 0.25000000 0.2647059
-100% 0.41176471 0.42647059 0.4117647
-
-- Para LDA el error minimo es aprox. 0.074 y el máximo 0.412
-- Para QDA el minimo es 0.088 y el maximo 0.426
-- Para RF el minimo es 0.103 y el maximo 0.412
-
-#----------------------------------------------------------------
-
-Observando esto podemos concluir que el mejor método es LDA ya que se mueve
-en errores más pequeños. En algunos casos QDA (normalmente en los quantiles
-mas pequeños) y RF (en los cuantiles mas grandes) pueden llegar a igualarlo
-pero nunca lo mejoran.
-
-Esto podria variar con otros datasets (más o menos lineales o más o menos
-voluminosos)
-
-
-"""
 
