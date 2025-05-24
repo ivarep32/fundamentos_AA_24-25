@@ -48,6 +48,6 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
 | `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión                               |
 | `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
-| `script 8`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada                               |
+| `script 8`     | `AA_RegreNLPen`                  | Regresion con penalizacion y no lineal                              |
 
 
