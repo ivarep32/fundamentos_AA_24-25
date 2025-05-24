@@ -19,9 +19,8 @@ library(GGally)
 ggpairs(savings) + theme_bw()
 
 #Ajuste modelo regrsion lineal multiple
-modelo <- lm(savings$sr ~ savings$pop15 + savings$pop75 + savings$dpi + savings$ddpi)
-
-summary(modelo)
+z <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+summary(z)
 
 # El resumen proporciona:
 # - Coeficientes estimados (β̂)
@@ -36,7 +35,7 @@ summary(modelo)
 #-----------------------------------------------------------
 # Sección 1.1: Estimación de los parámetros del modelo
 #-----------------------------------------------------------
-beta <- coef(modelo)
+beta <- coef(z)
 
 #matriz del diseño
 X <- model.matrix(z)
@@ -68,7 +67,7 @@ M <- diag(1, n) - H
 residuos <- M %*% y
 
 # También se pueden obtener con:
-residuals(modelo)
+residuals(z)
 
 #-----------------------------------------------------------
 # Sección 2: Estimación de la varianza
@@ -79,7 +78,7 @@ residuals(modelo)
 RSS <- t(y - X %*% hbeta) %*% (y - X %*% hbeta)
 
 # Equivalente con función deviance:
-deviance(modelo)
+deviance(z)
 
 # Varianza estimada del error
 sigma2 <- RSS / (n - p)
@@ -381,5 +380,314 @@ f
 pvalue
 anova(z2, z)
 
+#-----------------------------------------------------------
+# SECCIÓN 7: Predicción con el modelo ajustado
+#-----------------------------------------------------------
+# Obtenemos las predicciones puntuales para los datos de la muestra
+#Aplicando  la  función  predict  obtenemos  las  predicciones  de
+# la  tasa  de  ahorro  considerando  los valores  observados  en  la  muestra.
+#-----------------------------------------------------------
+predicciones_muestra <- predict(z)
+print(predicciones_muestra)
 
+# Salida:
+# Predicciones para los primeros países:
+# Australia: 10.57, Austria: 11.45, ..., Malaysia: 7.68
+# Esto representa la tasa de ahorro estimada por el modelo para cada observación.
+#-----------------------------------------------------------
+
+-----------------------------------------------------------
+# Predicción para un nuevo país hipotético:
+# - pop15 = 30%, pop75 = 2%, dpi = 1000, ddpi = 5
+#-----------------------------------------------------------
+predict(z, data.frame(pop15 = 30, pop75 = 2, dpi = 1000, ddpi = 5))
+# EJECUTAR ESTA LINEA EN LA LINEA DE COMANDOS NO PREGUNTES POR QUE
+
+#-----------------------------------------------------------
+# Intervalos de confianza y predicción
+#-----------------------------------------------------------
+# Intervalo de confianza para la media condicional (nivel 95%)
+predict(z,data.frame(pop15=c(30,40),pop75=c(2,1.5),dpi=c(1000,500), ddpi=c(5,4)),interval="confidence")
+
+# Intervalo de predicción para una observación individual (nivel 95%)
+predict(z,data.frame(pop15=c(30,40),pop75=c(2,1.5),dpi=c(1000,500), ddpi=c(5,4)),interval="prediction")
+
+# - El intervalo de confianza (5.06, 21.06) indica que, con un 95% de confianza,
+#   la tasa de ahorro media para países con estas características está en este rango.
+# - El intervalo de predicción (1.28, 16.82) es más amplio, ya que incluye la variabilidad
+#   del error aleatorio ε.
+
+#-----------------------------------------------------------
+# SECCIÓN 8: Ejercicios propuestos
+#-----------------------------------------------------------
+# EJERICIO 1
+#-----------------------------------------------------------
+# Apartado  a
+#-----------------------------------------------------------
+# Cargar librería y datos
+library(faraway)
+data(gala)
+
+# Ajustar modelo (todas las variables excepto "Species" como predictoras)
+modelo_gala <- lm(Species ~ ., data = gala)
+summary(modelo_gala)
+
+# Intervalos de confianza al 95% para los coeficientes
+confint(modelo_gala, level = 0.95)
+
+#Se ajusta un modelo múltiple usando todas las variables excepto Species como predictoras.
+# El resumen muestra los coeficientes estimados y su significación.
+# Los intervalos de confianza indican el rango plausible para cada parámetro al 95%
+
+#-----------------------------------------------------------
+# Apartado  b
+# matriz de diseño y matriz hat
+#-----------------------------------------------------------
+X <- model.matrix(modelo_gala) # matriz de diseño
+XtXi <- solve(t(X) %*% X)
+H <- X %*% XtXi %*% t(X) #matriz hat
+
+#-----------------------------------------------------------
+# Apartado  c
+# varianza residual e intervalo de cofianza para σ^2 al 95 %.
+#-----------------------------------------------------------
+#Extraer dimensiones del problema (n = muestras, p = parámetros)
+n <- nrow(X)
+p <- ncol(X)
+#Obtener el vector de respuesta y las predicciones del modelo
+y <- gala$Species
+beta <- coef(modelo_gala)
+#Calcular los residuos (observado - predicho)
+residuos <- y - X %*% beta
+# Calcular la suma residual de cuadrados (RSS)
+RSS <- sum(residuos^2)
+#Calcular la varianza residual estimada (σ^2)
+sigma2 <- RSS / (n - p)
+
+# Calcular un intervalo de confianza al 95% para la varianza σ^2
+# Utilizamos los cuantiles de la distribución Chi-cuadrado
+nivel <- 0.95
+alfa <- 1 - nivel
+IC_inf <- (n - p) * sigma2 / qchisq(1 - alfa/2, df = n - p)
+IC_sup <- (n - p) * sigma2 / qchisq(alfa/2, df = n - p)
+
+# Mostrar resultados de la varianza estimada y su intervalo
+sigma2
+c(inf = IC_inf, sup = IC_sup)
+
+#-----------------------------------------------------------
+# Apartado  d
+# coeficientes de correlación simple y parcial del número de
+# especies sobre las otras variables
+#-----------------------------------------------------------
+#Identificamos las variables predictoras
+variables <- names(gala)[names(gala) != "Species"]
+
+#Calculamos la correlación simple entre Species y cada predictora
+cor_simple <- sapply(variables, function(v) cor(gala$Species, gala[[v]]))
+
+# Calcular correlaciones parciales manualmente usando residuos
+# Para cada variable Xj, calculamos:
+# - Residuos de Species ~ otras variables
+# - Residuos de Xj ~ otras variables
+# - Correlación entre ambos residuos = correlación parcial
+
+cor_parcial_manual <- numeric(length(variables))
+names(cor_parcial_manual) <- variables
+
+for (var in variables) {
+  otras_vars <- setdiff(variables, var)
+
+  # Residuos de Species respecto a las otras variables
+  r_species <- residuals(lm(Species ~ ., data = gala[, c("Species", otras_vars)]))
+
+  # Residuos de la variable actual respecto a las otras
+  r_x <- residuals(lm(gala[[var]] ~ ., data = gala[, otras_vars]))
+
+  # Correlación parcial = correlación entre residuos
+  cor_parcial_manual[var] <- cor(r_species, r_x)
+}
+#Mostrar tabla comparativa entre correlaciones simples y parciales
+tabla <- data.frame(
+  Variable = variables,
+  Correlacion_Simple  = round(cor_simple[variables], 4),
+  Correlacion_Parcial = round(cor_parcial_manual, 4)
+)
+
+print(tabla)
+
+#-----------------------------------------------------------
+# Apartado  e
+# Aplica  el  F-test  y  comenta  los  resultados
+#-----------------------------------------------------------
+# Modelo completo (todas las variables)
+modelo_full <- lm(Species ~ ., data = gala)
+
+# Modelo restringido (sin Endemics y Area)
+#viendo el summary son las de mayor significancia (menor p valor)
+modelo_restringido <- lm(Species ~ Elevation + Nearest + Scruz + Adjacent, data = gala)
+
+# Cálculo manual del test F
+rss0 <- deviance(modelo_restringido)  # RSS del modelo restringido
+rss  <- deviance(modelo_full)   # RSS del modelo completo
+
+q <- 2           # nº de restricciones
+n <- nrow(model.matrix(modelo_full))
+p <- ncol(model.matrix(modelo_full))
+
+f <- ((rss0 - rss) / q) / (rss / (n - p))
+pvalue <- 1 - pf(f, q, n - p)
+
+f
+pvalue
+
+#hacemos anova
+anova(modelo_restringido, modelo_full)
+
+#vamos a probar ahora a quitar la variable menos significativa (Adjacent)
+modelo_restringido_2 <- lm(Species ~ Endemics + Area + Elevation + Nearest + Scruz, data = gala)
+
+rss0 <- deviance(modelo_restringido_2)  # RSS del modelo restringido
+
+f_2 <- ((rss0 - rss) / q) / (rss / (n - p))
+pvalue_2 <- 1 - pf(f_2, q, n - p)
+
+f_2
+pvalue_2
+
+#hacemos anova
+anova(modelo_restringido_2, modelo_full)
+
+# Calculamos el estadístico F de forma manual para comparar ambos modelos:
+# Un valor de F = 44.2 con un p-valor ≈ 1.3e-08 indica que eliminar 'Endemics' y 'Area'
+# reduce significativamente la calidad del modelo. Estas variables son relevantes.
+
+# La función anova(modelo_restringido, modelo_full) confirma este resultado, mostrando que la diferencia
+# entre modelos es altamente significativa (p < 0.001). Por tanto, no conviene eliminar esas variables.
+
+# En contraste, construimos un segundo modelo restringido eliminando 'Adjacent', que es la variable
+
+# En este caso, el estadístico F = 0.0116 y el p-valor ≈ 0.988, lo que indica que eliminar 'Adjacent'
+# no afecta significativamente al modelo. Su contribución es mínima.
+
+# La anova también lo confirma: la diferencia entre modelos al eliminar 'Adjacent' no es significativa.
+
+# En resumen:
+# - Eliminar variables relevantes (como 'Endemics') degrada mucho el modelo (alta F, bajo p).
+# - Eliminar variables irrelevantes (como 'Adjacent') no afecta el modelo (baja F, alto p).
+# Esto valida el enfoque basado en la significancia individual y el test F global para evaluar qué
+# variables conviene eliminar o mantener.
+
+#-----------------------------------------------------------
+# EJERICIO 2
+#-----------------------------------------------------------
+# Apartado  a
+#Ajusta un modelo de regresión múltiple que explique la cantidad de grasa
+# corporal en función de las otras variables. Prueba considerando las tres
+# variables como explicativas o subconjuntos de dos variables.
+#-----------------------------------------------------------
+# Cargar datos
+fat <- read.table("Fat.txt", header = TRUE, sep = "", dec=".")
+names(fat)
+
+#modelo con las 3 variables
+modelo_full <- lm(Fat ~ Triceps + Thigh + Midarm, data = fat)
+summary(modelo_full)
+
+# modelos con parejas de variables
+modelo_parcial_1 <- lm(Fat ~ Triceps + Thigh, data = fat)
+modelo_parcial_2 <- lm(Fat ~ Triceps + Midarm, data = fat)
+modelo_parcial_3 <- lm(Fat ~ Thigh + Midarm, data = fat)
+
+#comparaciones
+anova(modelo_full, modelo_parcial_1)
+anova(modelo_full, modelo_parcial_2)
+anova(modelo_full, modelo_parcial_3)
+
+#vemos que todos los modelos parciales tienen un pvalor por encima
+#de 0.1 lo que significa que por si mismas no son tan significativas
+# aunque si lo son cuando estan juntas
+
+#-----------------------------------------------------------
+# Apartado b
+#Obtén  intervalos  de  conﬁanza  para  los  parámetros  del
+# modelo  ajustado.
+#-----------------------------------------------------------
+#un parámetro es estadísticamente significativo al 95% si su intervalo de confianza no incluye el cero.
+
+#intervalos de 95% para el modelo entero
+confint(modelo_full)
+#Como todos los intervalos contienen el 0, ninguna de las
+# variables es significativa individualmente en el modelo completo.
+# Esto refuerza lo que veíamos antes con los valores-p altos: hay colinealidad.
+
+# ahora para cada modelo ajustado
+confint(modelo_parcial_1)
+# aqui hay dos intervalos que no contienen 0
+#Thigh se vuelve significativa cuando no está Midarm,
+# lo que indica que Midarm y Thigh están compartiendo información.
+
+confint(modelo_parcial_2)
+# Triceps y Midarm son significativos aquí, cuando Thigh no está.
+# cada variable gana fuerza cuando se eliminan otras que están correlacionadas con ella.
+
+confint(modelo_parcial_3)
+#Thigh es significativo cuando Triceps no está.
+#Midarm no lo es en este modelo.
+
+#🔎 Conclusión general
+#En el modelo completo, nadie es significativo individualmente porque hay colinealidad:
+# las variables están correlacionadas y "se pisan".
+#Cuando sacas una de las variables, otras se vuelven significativas.
+#Por ejemplo, Triceps y Midarm son significativos cuando se elimina Thigh.
+#Esto confirma que las variables se "anulan" mutuamente en el modelo completo.
+
+#-----------------------------------------------------------
+# Apartado c
+#Calcula  los  coeﬁcientes  de  correlación  simple  y
+# parcial  de  la  grasa  corporal  con  las  otras variables.
+#-----------------------------------------------------------
+
+#Correlaciones simples
+#Son las correlaciones de Pearson entre Fat y cada predictor individual, sin ajustar por las otras variables.
+cor(fat) # para ver la tabla completa
+cor(fat$Fat, fat[, c("Triceps", "Thigh", "Midarm")]) #para ver solo fat contra las variables
+
+# Resultados:
+# Triceps:  0.843 → correlación fuerte positiva
+# Thigh:    0.878 → correlación muy fuerte positiva
+# Midarm:   0.142 → correlación débil positiva
+#
+# Interpretación:
+# Triceps y Thigh están altamente correlacionadas con la grasa corporal cuando se observan por separado.
+# Midarm, en cambio, no muestra una relación fuerte por sí sola.
+
+
+
+#Correlaciones parciales
+#Miden la correlación entre Fat y otra variable, controlando por las demás. Para esto se necesita el paquete ppcor.
+library(ppcor)
+
+#calculo de correlaciones parciales
+pcor_result <- pcor(fat)
+pcor_result$estimate  # muestra las correlaciones parciales
+pcor_result$estimate["Fat", ] # muestra solo las de fat
+
+# Resultados:
+# Triceps:  0.338 → correlación parcial moderada positiva
+# Thigh:   -0.267 → correlación parcial débil negativa
+# Midarm:  -0.324 → correlación parcial moderada negativa
+#
+# Interpretación:
+# Triceps mantiene una relación positiva con la grasa incluso controlando por las otras variables,
+# lo que indica que su efecto es más independiente.
+# Thigh, a pesar de su alta correlación simple, muestra una relación negativa débil cuando se
+# controlan las otras variables. Esto sugiere que su efecto estaba parcialmente mediado por Triceps.
+# Midarm tiene una correlación simple baja, pero su relación parcial con la grasa es negativa,
+# indicando que podría introducir ruido en el modelo si se incluye.
+
+# Conclusión:
+# - Triceps parece ser el predictor más confiable.
+# - Thigh y Midarm pueden estar aportando colinealidad o redundancia.
+# - Esta interpretación explica por qué en el modelo completo ninguna variable fue significativa por sí sola.
 
