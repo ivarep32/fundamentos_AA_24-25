@@ -47,7 +47,7 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 4`     | `MetodoRemuestreo`               | Método de remuestreo para regresión lineal simple *(Bootstrap)*                              |
 | `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
 | `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión                               |
-| `script 7`     | `S7_AA_IA_2425`                  | Métodos  de  selección  de  variables Regresión                               |
-| `script 8`     | `S8_AA_IA_2425`                  | Regresión  lineal  con  regularización                               |
+| `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
+| `script 8`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada                               |
 
 
