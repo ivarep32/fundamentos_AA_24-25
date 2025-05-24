@@ -124,3 +124,7 @@ shapiro.test(rstandard(mod_b2))
 # Distancia de Cook mide el cambio en las predicciones al eliminar cada punto
 # Fórmula: D_i = (1/p) * r_i^2 * (h_ii/(1-h_ii))
 # Criterio: D_i > 0.5 o D_i > 1 indica influencia preocupante
+cooks.distance(mod_b2)
+# Identificamos puntos influyentes
+which(cooks.distance(mod_b2) > 0.5)  # Solo la observación 21
+
