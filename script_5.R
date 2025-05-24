@@ -577,3 +577,117 @@ anova(modelo_restringido_2, modelo_full)
 # - Eliminar variables irrelevantes (como 'Adjacent') no afecta el modelo (baja F, alto p).
 # Esto valida el enfoque basado en la significancia individual y el test F global para evaluar qué
 # variables conviene eliminar o mantener.
+
+#-----------------------------------------------------------
+# EJERICIO 2
+#-----------------------------------------------------------
+# Apartado  a
+#Ajusta un modelo de regresión múltiple que explique la cantidad de grasa
+# corporal en función de las otras variables. Prueba considerando las tres
+# variables como explicativas o subconjuntos de dos variables.
+#-----------------------------------------------------------
+# Cargar datos
+fat <- read.table("Fat.txt", header = TRUE, sep = "", dec=".")
+names(fat)
+
+#modelo con las 3 variables
+modelo_full <- lm(Fat ~ Triceps + Thigh + Midarm, data = fat)
+summary(modelo_full)
+
+# modelos con parejas de variables
+modelo_parcial_1 <- lm(Fat ~ Triceps + Thigh, data = fat)
+modelo_parcial_2 <- lm(Fat ~ Triceps + Midarm, data = fat)
+modelo_parcial_3 <- lm(Fat ~ Thigh + Midarm, data = fat)
+
+#comparaciones
+anova(modelo_full, modelo_parcial_1)
+anova(modelo_full, modelo_parcial_2)
+anova(modelo_full, modelo_parcial_3)
+
+#vemos que todos los modelos parciales tienen un pvalor por encima
+#de 0.1 lo que significa que por si mismas no son tan significativas
+# aunque si lo son cuando estan juntas
+
+#-----------------------------------------------------------
+# Apartado b
+#Obtén  intervalos  de  conﬁanza  para  los  parámetros  del
+# modelo  ajustado.
+#-----------------------------------------------------------
+#un parámetro es estadísticamente significativo al 95% si su intervalo de confianza no incluye el cero.
+
+#intervalos de 95% para el modelo entero
+confint(modelo_full)
+#Como todos los intervalos contienen el 0, ninguna de las
+# variables es significativa individualmente en el modelo completo.
+# Esto refuerza lo que veíamos antes con los valores-p altos: hay colinealidad.
+
+# ahora para cada modelo ajustado
+confint(modelo_parcial_1)
+# aqui hay dos intervalos que no contienen 0
+#Thigh se vuelve significativa cuando no está Midarm,
+# lo que indica que Midarm y Thigh están compartiendo información.
+
+confint(modelo_parcial_2)
+# Triceps y Midarm son significativos aquí, cuando Thigh no está.
+# cada variable gana fuerza cuando se eliminan otras que están correlacionadas con ella.
+
+confint(modelo_parcial_3)
+#Thigh es significativo cuando Triceps no está.
+#Midarm no lo es en este modelo.
+
+#🔎 Conclusión general
+#En el modelo completo, nadie es significativo individualmente porque hay colinealidad:
+# las variables están correlacionadas y "se pisan".
+#Cuando sacas una de las variables, otras se vuelven significativas.
+#Por ejemplo, Triceps y Midarm son significativos cuando se elimina Thigh.
+#Esto confirma que las variables se "anulan" mutuamente en el modelo completo.
+
+#-----------------------------------------------------------
+# Apartado c
+#Calcula  los  coeﬁcientes  de  correlación  simple  y
+# parcial  de  la  grasa  corporal  con  las  otras variables.
+#-----------------------------------------------------------
+
+#Correlaciones simples
+#Son las correlaciones de Pearson entre Fat y cada predictor individual, sin ajustar por las otras variables.
+cor(fat) # para ver la tabla completa
+cor(fat$Fat, fat[, c("Triceps", "Thigh", "Midarm")]) #para ver solo fat contra las variables
+
+# Resultados:
+# Triceps:  0.843 → correlación fuerte positiva
+# Thigh:    0.878 → correlación muy fuerte positiva
+# Midarm:   0.142 → correlación débil positiva
+#
+# Interpretación:
+# Triceps y Thigh están altamente correlacionadas con la grasa corporal cuando se observan por separado.
+# Midarm, en cambio, no muestra una relación fuerte por sí sola.
+
+
+
+#Correlaciones parciales
+#Miden la correlación entre Fat y otra variable, controlando por las demás. Para esto se necesita el paquete ppcor.
+library(ppcor)
+
+#calculo de correlaciones parciales
+pcor_result <- pcor(fat)
+pcor_result$estimate  # muestra las correlaciones parciales
+pcor_result$estimate["Fat", ] # muestra solo las de fat
+
+# Resultados:
+# Triceps:  0.338 → correlación parcial moderada positiva
+# Thigh:   -0.267 → correlación parcial débil negativa
+# Midarm:  -0.324 → correlación parcial moderada negativa
+#
+# Interpretación:
+# Triceps mantiene una relación positiva con la grasa incluso controlando por las otras variables,
+# lo que indica que su efecto es más independiente.
+# Thigh, a pesar de su alta correlación simple, muestra una relación negativa débil cuando se
+# controlan las otras variables. Esto sugiere que su efecto estaba parcialmente mediado por Triceps.
+# Midarm tiene una correlación simple baja, pero su relación parcial con la grasa es negativa,
+# indicando que podría introducir ruido en el modelo si se incluye.
+
+# Conclusión:
+# - Triceps parece ser el predictor más confiable.
+# - Thigh y Midarm pueden estar aportando colinealidad o redundancia.
+# - Esta interpretación explica por qué en el modelo completo ninguna variable fue significativa por sí sola.
+
