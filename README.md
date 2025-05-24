@@ -46,3 +46,4 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 3_b_II`| `S3_AA_IA_2425_2_1`              | Análisis de Regresión con R (Parte II)                                                        |
 | `script 4`     | `MetodoRemuestreo`               | Método de remuestreo para regresión lineal simple *(Bootstrap)*                              |
 | `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
+| `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión  -  Grado  en  Inteligencia  Artiﬁcial|
