@@ -49,5 +49,7 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión                               |
 | `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
 | `script 8`     | `AA_RegreNLPen`                  | Regresion con penalizacion y no lineal                              |
+| `script 9`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada                       |
+
 
 
