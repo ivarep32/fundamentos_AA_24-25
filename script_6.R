@@ -140,3 +140,36 @@ which(cooks.distance(mod_b2) > 0.5)  # Solo la observación 21
 # 4. Residuos vs Apalancamiento: Para identificar puntos influyentes
 par(mfrow = c(2, 2))
 plot(mod_b2)
+
+# =============================================
+# 4. PAUTAS DE ACTUACIÓN
+# =============================================
+
+# TEORÍA:
+# Ante observaciones atípicas/influyentes:
+# 1. Verificar si son errores de medición/digitación
+# 2. Considerar transformaciones de variables
+# 3. Evaluar modelos alternativos (robustos)
+# 4. Si se justifica, eliminar las observaciones problemáticas
+
+# En nuestro caso, la observación 21 es claramente influyente:
+# - Alto apalancamiento (0.383)
+# - Residuo estudentizado extremo (-5.97)
+# - Distancia de Cook muy alta (3.92)
+
+# Opción 1: Eliminar la observación influyente
+mod_clean <- lm(y ~ x)  # Volvemos al modelo original
+
+# Opción 2: Usar regresión robusta (se reduce la influencia pero sigue estando)
+library(MASS)
+mod_robusto <- rlm(y_ampliado ~ x_ampliado)
+
+# Comparación de coeficientes
+coef(mod_b2)  # Con el punto influyente
+coef(mod_clean)  # Sin el punto
+coef(mod_robusto)  # Modelo robusto
+
+# CONCLUSIÓN:
+# El punto añadido en x=30 afecta significativamente el modelo
+# La solución más simple en este caso es eliminarlo
+# En casos reales, habría que investigar la causa de la anomalía
