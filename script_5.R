@@ -400,8 +400,8 @@ print(predicciones_muestra)
 # Predicción para un nuevo país hipotético:
 # - pop15 = 30%, pop75 = 2%, dpi = 1000, ddpi = 5
 #-----------------------------------------------------------
-predict(z, data.frame(pop15=30, pop75=2, dpi=1000, ddpi=5))
-# en el pdf da 13.06, a mi me da -13.06 pero no encuentro el error
+predict(z, data.frame(pop15 = 30, pop75 = 2, dpi = 1000, ddpi = 5))
+# EJECUTAR ESTA LINEA EN LA LINEA DE COMANDOS NO PREGUNTES POR QUE
 
 #-----------------------------------------------------------
 # Intervalos de confianza y predicción
@@ -417,5 +417,163 @@ predict(z,data.frame(pop15=c(30,40),pop75=c(2,1.5),dpi=c(1000,500), ddpi=c(5,4))
 # - El intervalo de predicción (1.28, 16.82) es más amplio, ya que incluye la variabilidad
 #   del error aleatorio ε.
 
+#-----------------------------------------------------------
+# SECCIÓN 8: Ejercicios propuestos
+#-----------------------------------------------------------
+# EJERICIO 1
+#-----------------------------------------------------------
+# Apartado  a
+#-----------------------------------------------------------
+# Cargar librería y datos
+library(faraway)
+data(gala)
 
+# Ajustar modelo (todas las variables excepto "Species" como predictoras)
+modelo_gala <- lm(Species ~ ., data = gala)
+summary(modelo_gala)
 
+# Intervalos de confianza al 95% para los coeficientes
+confint(modelo_gala, level = 0.95)
+
+#Se ajusta un modelo múltiple usando todas las variables excepto Species como predictoras.
+# El resumen muestra los coeficientes estimados y su significación.
+# Los intervalos de confianza indican el rango plausible para cada parámetro al 95%
+
+#-----------------------------------------------------------
+# Apartado  b
+# matriz de diseño y matriz hat
+#-----------------------------------------------------------
+X <- model.matrix(modelo_gala) # matriz de diseño
+XtXi <- solve(t(X) %*% X)
+H <- X %*% XtXi %*% t(X) #matriz hat
+
+#-----------------------------------------------------------
+# Apartado  c
+# varianza residual e intervalo de cofianza para σ^2 al 95 %.
+#-----------------------------------------------------------
+#Extraer dimensiones del problema (n = muestras, p = parámetros)
+n <- nrow(X)
+p <- ncol(X)
+#Obtener el vector de respuesta y las predicciones del modelo
+y <- gala$Species
+beta <- coef(modelo_gala)
+#Calcular los residuos (observado - predicho)
+residuos <- y - X %*% beta
+# Calcular la suma residual de cuadrados (RSS)
+RSS <- sum(residuos^2)
+#Calcular la varianza residual estimada (σ^2)
+sigma2 <- RSS / (n - p)
+
+# Calcular un intervalo de confianza al 95% para la varianza σ^2
+# Utilizamos los cuantiles de la distribución Chi-cuadrado
+nivel <- 0.95
+alfa <- 1 - nivel
+IC_inf <- (n - p) * sigma2 / qchisq(1 - alfa/2, df = n - p)
+IC_sup <- (n - p) * sigma2 / qchisq(alfa/2, df = n - p)
+
+# Mostrar resultados de la varianza estimada y su intervalo
+sigma2
+c(inf = IC_inf, sup = IC_sup)
+
+#-----------------------------------------------------------
+# Apartado  d
+# coeficientes de correlación simple y parcial del número de
+# especies sobre las otras variables
+#-----------------------------------------------------------
+#Identificamos las variables predictoras
+variables <- names(gala)[names(gala) != "Species"]
+
+#Calculamos la correlación simple entre Species y cada predictora
+cor_simple <- sapply(variables, function(v) cor(gala$Species, gala[[v]]))
+
+# Calcular correlaciones parciales manualmente usando residuos
+# Para cada variable Xj, calculamos:
+# - Residuos de Species ~ otras variables
+# - Residuos de Xj ~ otras variables
+# - Correlación entre ambos residuos = correlación parcial
+
+cor_parcial_manual <- numeric(length(variables))
+names(cor_parcial_manual) <- variables
+
+for (var in variables) {
+  otras_vars <- setdiff(variables, var)
+
+  # Residuos de Species respecto a las otras variables
+  r_species <- residuals(lm(Species ~ ., data = gala[, c("Species", otras_vars)]))
+
+  # Residuos de la variable actual respecto a las otras
+  r_x <- residuals(lm(gala[[var]] ~ ., data = gala[, otras_vars]))
+
+  # Correlación parcial = correlación entre residuos
+  cor_parcial_manual[var] <- cor(r_species, r_x)
+}
+#Mostrar tabla comparativa entre correlaciones simples y parciales
+tabla <- data.frame(
+  Variable = variables,
+  Correlacion_Simple  = round(cor_simple[variables], 4),
+  Correlacion_Parcial = round(cor_parcial_manual, 4)
+)
+
+print(tabla)
+
+#-----------------------------------------------------------
+# Apartado  e
+# Aplica  el  F-test  y  comenta  los  resultados
+#-----------------------------------------------------------
+# Modelo completo (todas las variables)
+modelo_full <- lm(Species ~ ., data = gala)
+
+# Modelo restringido (sin Endemics y Area)
+#viendo el summary son las de mayor significancia (menor p valor)
+modelo_restringido <- lm(Species ~ Elevation + Nearest + Scruz + Adjacent, data = gala)
+
+# Cálculo manual del test F
+rss0 <- deviance(modelo_restringido)  # RSS del modelo restringido
+rss  <- deviance(modelo_full)   # RSS del modelo completo
+
+q <- 2           # nº de restricciones
+n <- nrow(model.matrix(modelo_full))
+p <- ncol(model.matrix(modelo_full))
+
+f <- ((rss0 - rss) / q) / (rss / (n - p))
+pvalue <- 1 - pf(f, q, n - p)
+
+f
+pvalue
+
+#hacemos anova
+anova(modelo_restringido, modelo_full)
+
+#vamos a probar ahora a quitar la variable menos significativa (Adjacent)
+modelo_restringido_2 <- lm(Species ~ Endemics + Area + Elevation + Nearest + Scruz, data = gala)
+
+rss0 <- deviance(modelo_restringido_2)  # RSS del modelo restringido
+
+f_2 <- ((rss0 - rss) / q) / (rss / (n - p))
+pvalue_2 <- 1 - pf(f_2, q, n - p)
+
+f_2
+pvalue_2
+
+#hacemos anova
+anova(modelo_restringido_2, modelo_full)
+
+# Calculamos el estadístico F de forma manual para comparar ambos modelos:
+# Un valor de F = 44.2 con un p-valor ≈ 1.3e-08 indica que eliminar 'Endemics' y 'Area'
+# reduce significativamente la calidad del modelo. Estas variables son relevantes.
+
+# La función anova(modelo_restringido, modelo_full) confirma este resultado, mostrando que la diferencia
+# entre modelos es altamente significativa (p < 0.001). Por tanto, no conviene eliminar esas variables.
+
+# En contraste, construimos un segundo modelo restringido eliminando 'Adjacent', que es la variable
+
+# En este caso, el estadístico F = 0.0116 y el p-valor ≈ 0.988, lo que indica que eliminar 'Adjacent'
+# no afecta significativamente al modelo. Su contribución es mínima.
+
+# La anova también lo confirma: la diferencia entre modelos al eliminar 'Adjacent' no es significativa.
+
+# En resumen:
+# - Eliminar variables relevantes (como 'Endemics') degrada mucho el modelo (alta F, bajo p).
+# - Eliminar variables irrelevantes (como 'Adjacent') no afecta el modelo (baja F, alto p).
+# Esto valida el enfoque basado en la significancia individual y el test F global para evaluar qué
+# variables conviene eliminar o mantener.
