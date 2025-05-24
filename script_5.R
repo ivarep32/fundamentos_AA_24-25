@@ -19,9 +19,8 @@ library(GGally)
 ggpairs(savings) + theme_bw()
 
 #Ajuste modelo regrsion lineal multiple
-modelo <- lm(savings$sr ~ savings$pop15 + savings$pop75 + savings$dpi + savings$ddpi)
-
-summary(modelo)
+z <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+summary(z)
 
 # El resumen proporciona:
 # - Coeficientes estimados (β̂)
@@ -36,7 +35,7 @@ summary(modelo)
 #-----------------------------------------------------------
 # Sección 1.1: Estimación de los parámetros del modelo
 #-----------------------------------------------------------
-beta <- coef(modelo)
+beta <- coef(z)
 
 #matriz del diseño
 X <- model.matrix(z)
@@ -68,7 +67,7 @@ M <- diag(1, n) - H
 residuos <- M %*% y
 
 # También se pueden obtener con:
-residuals(modelo)
+residuals(z)
 
 #-----------------------------------------------------------
 # Sección 2: Estimación de la varianza
@@ -79,7 +78,7 @@ residuals(modelo)
 RSS <- t(y - X %*% hbeta) %*% (y - X %*% hbeta)
 
 # Equivalente con función deviance:
-deviance(modelo)
+deviance(z)
 
 # Varianza estimada del error
 sigma2 <- RSS / (n - p)
@@ -380,6 +379,43 @@ pvalue <- 1 - pf(f, q, n - p)
 f
 pvalue
 anova(z2, z)
+
+#-----------------------------------------------------------
+# SECCIÓN 7: Predicción con el modelo ajustado
+#-----------------------------------------------------------
+# Obtenemos las predicciones puntuales para los datos de la muestra
+#Aplicando  la  función  predict  obtenemos  las  predicciones  de
+# la  tasa  de  ahorro  considerando  los valores  observados  en  la  muestra.
+#-----------------------------------------------------------
+predicciones_muestra <- predict(z)
+print(predicciones_muestra)
+
+# Salida:
+# Predicciones para los primeros países:
+# Australia: 10.57, Austria: 11.45, ..., Malaysia: 7.68
+# Esto representa la tasa de ahorro estimada por el modelo para cada observación.
+#-----------------------------------------------------------
+
+-----------------------------------------------------------
+# Predicción para un nuevo país hipotético:
+# - pop15 = 30%, pop75 = 2%, dpi = 1000, ddpi = 5
+#-----------------------------------------------------------
+predict(z, data.frame(pop15=30, pop75=2, dpi=1000, ddpi=5))
+# en el pdf da 13.06, a mi me da -13.06 pero no encuentro el error
+
+#-----------------------------------------------------------
+# Intervalos de confianza y predicción
+#-----------------------------------------------------------
+# Intervalo de confianza para la media condicional (nivel 95%)
+predict(z,data.frame(pop15=c(30,40),pop75=c(2,1.5),dpi=c(1000,500), ddpi=c(5,4)),interval="confidence")
+
+# Intervalo de predicción para una observación individual (nivel 95%)
+predict(z,data.frame(pop15=c(30,40),pop75=c(2,1.5),dpi=c(1000,500), ddpi=c(5,4)),interval="prediction")
+
+# - El intervalo de confianza (5.06, 21.06) indica que, con un 95% de confianza,
+#   la tasa de ahorro media para países con estas características está en este rango.
+# - El intervalo de predicción (1.28, 16.82) es más amplio, ya que incluye la variabilidad
+#   del error aleatorio ε.
 
 
 
