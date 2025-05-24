@@ -128,3 +128,15 @@ cooks.distance(mod_b2)
 # Identificamos puntos influyentes
 which(cooks.distance(mod_b2) > 0.5)  # Solo la observación 21
 
+# =============================================
+# 3. GRÁFICOS DE DIAGNOSIS
+# =============================================
+
+# TEORÍA:
+# R produce 4 gráficos de diagnóstico automáticos:
+# 1. Residuos vs Ajustados: Para detectar no linealidad, heterocedasticidad
+# 2. QQ-plot: Para evaluar normalidad de residuos
+# 3. Scale-Location: Para detectar heterocedasticidad
+# 4. Residuos vs Apalancamiento: Para identificar puntos influyentes
+par(mfrow = c(2, 2))
+plot(mod_b2)
