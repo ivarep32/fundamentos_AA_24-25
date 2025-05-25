@@ -31,6 +31,23 @@ summary(z)
 # Interpretación:
 # Por ejemplo, un coeficiente negativo en pop15 indica que a mayor % de
 # población joven, menor tasa de ahorro, con significación estadística.
+#Estimate (Estimación): El valor estimado del intercepto es 28.5660865
+# En un modelo de regresión lineal, el intercepto es el valor esperado de la
+# variable dependiente (en este caso, la tasa de ahorro sr) cuando todas las
+# variables independientes son cero.
+#Std. Error (Error Estándar): El error estándar del intercepto es 7.3545161
+# Mide la precisión de la estimación del intercepto.
+#t value (valor t): El valor t para el intercepto es 3.884 Se utiliza para
+# realizar una prueba t de hipótesis sobre si el intercepto es significativamente
+# diferente de cero.
+#Pr(>|t|) (valor p): El valor p asociado con el valor t es 0.000334
+# Representa la probabilidad de observar un valor t tan extremo como el calculado
+# (o más extremo) si el intercepto verdadero fuera cero.
+# Un valor p pequeño (normalmente menor que 0.05) sugiere que el intercepto es
+# significativamente diferente de cero.
+#Signif. codes (códigos de significación): Los asteriscos () indican el nivel de
+# significación estadística
+# En este caso, "***" significa que el intercepto es muy significativo (p < 0.001)
 
 #-----------------------------------------------------------
 # Sección 1.1: Estimación de los parámetros del modelo
