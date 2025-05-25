@@ -50,5 +50,8 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
 | `script 8`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada   (no se hizo)                    |
 
+## 🕯️Enlace para poner una vela en la catedral de santiago (necesario)
+https://velas.catedraldesantiago.es/es/enciende-una-vela
+
 
 
