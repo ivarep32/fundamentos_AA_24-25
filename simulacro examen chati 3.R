@@ -116,16 +116,15 @@ round(vif_vals_ajustadas, 3)
 # los predictores antes de aplicar la regresión con penalización.
 #---------------------------------------------------------
 library(glmnet)
+
 # Paso 1: Preparar los datos
-# - X: matriz de predictores
+# - X: matriz de predictores (sin intercepto, pero con nombres)
 # - y: variable respuesta (sr)
-X <- model.matrix(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)[, -1]  # Quitamos intercepto
+
+X <- model.matrix(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+X <- X[, colnames(X) != "(Intercept)"]  # Quitar solo la columna del intercepto, conservar nombres
+
 y <- savings$sr
-# NOTA IMPORTANTE:
-# Standardize = TRUE es RECOMENDADO porque las penalizaciones de Ridge y LASSO
-# dependen de la escala de los predictores. Si las variables están en escalas muy distintas
-# (por ejemplo, pop15 en %, dpi en miles), esto distorsiona la penalización.
-# Estandarizar = centrar y escalar cada columna (media 0, varianza 1).
 
 #--------------------------------------------------
 # RIDGE REGRESSION (alpha = 0)
@@ -143,6 +142,7 @@ coef(rridge, s = rridge$lambda.1se)
 prridge <- predict(rridge, newx = X, s = rridge$lambda.1se)
 plot(prridge, y, main = "Ridge: predicciones vs. reales")
 abline(0, 1, col = "red")
+
 #--------------------------------------------------
 # LASSO REGRESSION (alpha = 1)
 #--------------------------------------------------
@@ -156,6 +156,7 @@ coef(rlasso, s = rlasso$lambda.1se)
 prlasso <- predict(rlasso, newx = X, s = rlasso$lambda.1se)
 plot(prlasso, y, main = "LASSO: predicciones vs. reales")
 abline(0, 1, col = "blue")
+
 #--------------------------------------------------
 # ELASTIC NET (alpha = 0.5)
 #--------------------------------------------------
@@ -165,17 +166,145 @@ plot(rEN)
 # Visualización adicional
 plot(rlasso$glmnet.fit, xvar = "lambda", label = TRUE, main = "Trayectorias LASSO")
 
-#--------------------------------------------------
-# INTERPRETACIÓN DEL PREPROCESAMIENTO
-#--------------------------------------------------
+#==============================================================
+# Comparación de coeficientes entre OLS, Ridge, LASSO y Elastic Net
+#==============================================================
 
-# ¿Por qué estandarizar es importante?
-# - Ridge y LASSO penalizan los coeficientes según su magnitud.
-# - Si una variable tiene escala mayor (ej: 1000s) que otra (ej: 0-1),
-#   su coeficiente será más penalizado, no por irrelevancia, sino por escala.
-# - Estandarizar permite que todas las variables contribuyan de forma equitativa
-#   a la penalización. Si no lo haces, las variables con varianza grande dominan.
+# Asumimos que tienes el modelo OLS ajustado en 'z' (lm)
+coef_z <- coef(z)
+coef_nombres <- names(coef_z)  # Ej: "(Intercept)", "pop15", "pop75", "dpi", "ddpi"
 
-# ¿Cuándo no se estandariza?
-# - En algunos casos particulares donde ya se ha transformado o centrado manualmente.
-# - Pero en la práctica con glmnet y regresión penalizada SIEMPRE SE RECOMIENDA usar standardize=TRUE.
+# Función para alinear coeficientes de glmnet con nombres de OLS, evitando NA
+alinear_coef <- function(coef_obj, nombres_referencia) {
+  coefs <- as.numeric(coef_obj)
+  names(coefs) <- rownames(coef_obj)
+  coefs_ajustados <- coefs[nombres_referencia]
+  coefs_ajustados[is.na(coefs_ajustados)] <- 0
+  return(coefs_ajustados)
+}
+
+# Coeficientes estimados por Ridge Regression (penalización L2)
+ridge_mat <- coef(rridge, s = rridge$lambda.1se)
+coef_ridge <- alinear_coef(ridge_mat, coef_nombres)
+
+# Coeficientes estimados por LASSO (penalización L1)
+lasso_mat <- coef(rlasso, s = rlasso$lambda.1se)
+coef_lasso <- alinear_coef(lasso_mat, coef_nombres)
+
+# Coeficientes estimados por Elastic Net (penalización combinada L1 y L2)
+elastic_mat <- coef(rEN, s = rEN$lambda.1se)
+coef_elasticnet <- alinear_coef(elastic_mat, coef_nombres)
+
+# Crear un data.frame para comparar todos los coeficientes
+coef_comparison <- data.frame(
+  OLS = round(coef_z, 4),
+  Ridge = round(coef_ridge, 4),
+  LASSO = round(coef_lasso, 4),
+  ElasticNet = round(coef_elasticnet, 4)
+)
+
+cat("Comparación de coeficientes entre modelos:\n")
+print(coef_comparison)
+# Interpretación de la comparación de coeficientes entre modelos:
+
+# OLS (Regresión Lineal Ordinaria)
+# - Los coeficientes reflejan la relación directa entre cada variable y la respuesta 'sr'.
+# - Por ejemplo, 'pop75' tiene un coeficiente negativo importante (-1.6915),
+#   indicando que a mayor proporción de personas mayores de 75 años, menor es 'sr'.
+# - Todos los coeficientes están presentes (no hay ceros), lo que significa que todas las variables se usan en el modelo.
+
+# Ridge Regression
+# - Los coeficientes se han "encogido" mucho hacia cero comparados con OLS.
+# - Esto es característico de Ridge, que penaliza coeficientes grandes sin forzarlos exactamente a cero.
+# - Por ejemplo, 'pop75' pasa de -1.6915 a un coeficiente cercano a cero (0.0149), mostrando regularización fuerte.
+# - Ningún coeficiente es exactamente cero, todas las variables permanecen en el modelo, aunque con menor peso.
+
+# LASSO Regression
+# - LASSO realiza selección automática de variables, forzando coeficientes a cero.
+# - Aquí, 'pop75' y 'dpi' tienen coeficiente 0, lo que indica que LASSO las excluyó del modelo.
+# - Variables como 'pop15' y 'ddpi' tienen coeficientes distintos de cero, consideradas relevantes.
+# - Esto ayuda a simplificar el modelo y mejorar interpretabilidad.
+
+# Elastic Net (alpha=0.5)
+# - Combina penalización L1 (LASSO) y L2 (Ridge), por eso algunos coeficientes son exactamente cero (como en LASSO), pero otros son reducidos suavemente.
+# - 'pop75' y 'dpi' quedan con coeficiente cero, igual que en LASSO.
+# - Coeficientes no nulos ('pop15' y 'ddpi') tienen magnitudes intermedias, equilibrando selección y estabilidad.
+# - Elastic Net es útil cuando hay variables correlacionadas, ofreciendo un balance entre selección y regularización.
+
+# Resumen:
+# - OLS incluye todas las variables sin penalización.
+# - Ridge reduce coeficientes pero mantiene todas las variables.
+# - LASSO selecciona variables relevantes eliminando algunas (coeficientes cero).
+# - Elastic Net combina ambas técnicas, ofreciendo una selección más estable en presencia de correlación entre variables.
+
+#==============================================================
+# ¿Qué variables son seleccionadas por LASSO?
+#==============================================================
+
+# Excluir intercepto (primer coeficiente)
+lasso_selected <- which(coef_lasso[-1] != 0)
+
+cat("\nVariables seleccionadas por LASSO (coef != 0):\n")
+print(colnames(X)[lasso_selected])
+
+#==============================================================
+# Exploración del efecto del parámetro alpha en Elastic Net
+#==============================================================
+
+alphas <- c(0.2, 0.5, 0.8)
+elastic_coefs <- list()
+
+for (a in alphas) {
+  rEN_temp <- cv.glmnet(X, y, alpha = a, standardize = TRUE)
+  elastic_mat_temp <- coef(rEN_temp, s = rEN_temp$lambda.1se)
+  elastic_coefs[[as.character(a)]] <- alinear_coef(elastic_mat_temp, coef_nombres)
+}
+
+# Crear data.frame con resultados redondeados
+elastic_comparison <- data.frame(
+  alpha_0.2 = round(elastic_coefs[["0.2"]], 4),
+  alpha_0.5 = round(elastic_coefs[["0.5"]], 4),
+  alpha_0.8 = round(elastic_coefs[["0.8"]], 4)
+)
+rownames(elastic_comparison) <- coef_nombres
+
+cat("\nComparación de coeficientes con diferentes valores de alpha en Elastic Net:\n")
+print(elastic_comparison)
+# Interpretación de la comparación de coeficientes con diferentes valores de alpha en Elastic Net:
+
+# alpha controla el balance entre Ridge (alpha=0) y LASSO (alpha=1).
+
+# alpha = 0.2 (más cercano a Ridge)
+# - Los coeficientes están todos cerca de cero, pero ninguno es exactamente cero (excepto algunos).
+# - Esto indica que el modelo es más "suave", penalizando pero sin hacer selección fuerte.
+# - Variables como 'pop15' y 'ddpi' tienen coeficientes pequeños pero distintos de cero.
+# - Elastic Net con alpha bajo mantiene casi todas las variables, reduciendo magnitudes para evitar sobreajuste.
+
+# alpha = 0.5 (balance intermedio)
+# - Varios coeficientes se vuelven exactamente cero (por ejemplo, 'pop15', 'pop75', 'dpi', 'ddpi').
+# - El modelo selecciona menos variables, haciendo una selección más agresiva.
+# - Esto muestra el efecto de la penalización L1 más fuerte, que induce sparsity.
+
+# alpha = 0.8 (más cercano a LASSO)
+# - Similar a alpha=0.5, pero los coeficientes no nulos tienden a tener mayor magnitud en valor absoluto.
+# - Variables seleccionadas ('pop15' y 'ddpi') tienen coeficientes más marcados, mientras otras quedan en cero.
+# - Mayor alpha enfatiza la selección de variables, favoreciendo modelos más parsimoniosos.
+
+# Resumen:
+# - Al aumentar alpha, Elastic Net se comporta más como LASSO, forzando más coeficientes a cero (más sparsity).
+# - Al disminuir alpha, se acerca a Ridge, manteniendo todos los coeficientes pero más pequeños.
+# - El parámetro alpha permite controlar el trade-off entre selección de variables y estabilidad del modelo.
+
+# Comentario final:
+cat("
+Interpretación:
+- LASSO seleccionó las siguientes variables como relevantes para predecir 'sr': ")
+cat(paste(colnames(X)[lasso_selected], collapse = ", "))
+cat("
+- Esto indica que LASSO realiza una selección automática útil cuando se busca simplicidad interpretativa.
+
+- En Elastic Net, al aumentar alpha de 0.2 a 0.8, los coeficientes tienden a ser más dispersos (más ceros).
+  Esto muestra cómo alpha controla el grado de sparsity (dispersión) del modelo:
+    - alpha bajo: todos los coeficientes son pequeños pero diferentes de cero.
+    - alpha alto: algunos coeficientes son forzados a cero (selección de variables).
+")
