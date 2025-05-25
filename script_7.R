@@ -57,7 +57,7 @@ table(real=datos$Tipo, predict=prqda$class) #tabla de confusion
 # P(Y = j | X = x) ≈ sum_{i} 1{Yi = j} * K(h^-1 * d(x, xi)) / sum_{i} K(h^-1 * d(x, xi))
 # donde h es un parámetro de suavizado (ancho de banda).
 
-# Implementación basada en script_8.R
+# Implementación basada en av
 classif_kernel_predict <- function(Xtrain, Ytrain, Xtest, h) {
   pred <- factor(rep(NA, nrow(Xtest)), levels = levels(Ytrain))
   for (i in 1:nrow(Xtest)) {
