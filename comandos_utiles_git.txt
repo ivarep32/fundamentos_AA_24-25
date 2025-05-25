@@ -1,0 +1,23 @@
+# Crear una rama y moverse a ella
+git checkout -b nombre-rama
+
+# Moverse entre ramas
+git checkout nombre-rama 
+
+# Traer los últimos cambios de la rama principal
+git pull origin master  
+
+# Fusionar tu rama con master
+git checkout master
+git pull origin master
+git merge nombre-rama
+
+# Si hay conflictos, resuélvelos, luego:
+git add .
+git commit
+
+# Subir los cambios al repositorio remoto
+git push origin master
+
+# Si se abre un editor al hacer merge (como vim) que es como una ventana rara y confusa en consola:
+# - Pulsa Esc, escribe :wq y presiona Enter para salir.
