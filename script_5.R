@@ -561,8 +561,8 @@ pvalue
 #hacemos anova
 anova(modelo_restringido, modelo_full)
 
-#vamos a probar ahora a quitar la variable menos significativa (Adjacent)
-modelo_restringido_2 <- lm(Species ~ Endemics + Area + Elevation + Nearest + Scruz, data = gala)
+#vamos a probar ahora a quitar la variable menos significativa (Scruz)
+modelo_restringido_2 <- lm(Species ~ Endemics + Area + Elevation + Nearest + Adjacent, data = gala)
 
 rss0 <- deviance(modelo_restringido_2)  # RSS del modelo restringido
 

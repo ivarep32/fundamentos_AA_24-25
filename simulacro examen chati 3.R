@@ -166,9 +166,13 @@ plot(rEN)
 # Visualización adicional
 plot(rlasso$glmnet.fit, xvar = "lambda", label = TRUE, main = "Trayectorias LASSO")
 
-#==============================================================
-# Comparación de coeficientes entre OLS, Ridge, LASSO y Elastic Net
-#==============================================================
+#------------------------------------------------------------------
+# b) Compara los coeficientes estimados por Ridge, LASSO y Elastic
+# Net con los coeficientes del modelo de regresión lineal sin penalización.
+# ¿Qué variables son seleccionadas por LASSO (es decir, tienen coeficientes
+# distintos de cero)? ¿Cómo afecta el parámetro alpha en Elastic Net a
+# la selección de variables y la magnitud de los coeficientes?
+#------------------------------------------------------------------
 
 # Asumimos que tienes el modelo OLS ajustado en 'z' (lm)
 coef_z <- coef(z)
@@ -308,3 +312,318 @@ cat("
     - alpha bajo: todos los coeficientes son pequeños pero diferentes de cero.
     - alpha alto: algunos coeficientes son forzados a cero (selección de variables).
 ")
+
+#------------------------------------------------------------------
+# c) Calcula el MSE (Error Cuadrático Medio) en una muestra de prueba
+# para Ridge, LASSO, Elastic Net y el modelo de regresión lineal
+# sin penalización. 
+#------------------------------------------------------------------
+
+#==============================================================
+# División de datos en conjunto de entrenamiento y prueba
+#==============================================================
+set.seed(123)  # Para reproducibilidad
+n <- nrow(savings)
+# Seleccionamos aleatoriamente 70% de los índices para entrenamiento
+train_idx <- sample(1:n, size = round(0.7 * n))
+# El resto serán los índices para prueba
+test_idx <- setdiff(1:n, train_idx)
+
+# Extraemos las matrices de predictores y vectores de respuesta para cada conjunto
+X_train <- X[train_idx,]
+y_train <- y[train_idx]
+X_test <- X[test_idx,]
+y_test <- y[test_idx]
+
+#==============================================================
+# Ajuste de modelos en datos de entrenamiento
+#==============================================================
+
+# OLS (Ordinary Least Squares)
+# Modelo lineal clásico sin penalización, minimiza suma de errores al cuadrado.
+z_train <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings[train_idx,])
+
+# Ridge Regression (alpha = 0)
+# Penalización L2: reduce magnitud de coeficientes para controlar varianza, no realiza selección de variables.
+rridge_train <- cv.glmnet(X_train, y_train, alpha = 0, standardize = TRUE)
+
+# LASSO (alpha = 1)
+# Penalización L1: puede reducir coeficientes a cero, realizando selección automática de variables.
+rlasso_train <- cv.glmnet(X_train, y_train, alpha = 1, standardize = TRUE)
+
+# Elastic Net (alpha = 0.5)
+# Combina penalizaciones L1 y L2, balanceando selección y estabilidad.
+rEN_train <- cv.glmnet(X_train, y_train, alpha = 0.5, standardize = TRUE)
+
+#==============================================================
+# Evaluación de modelos en conjunto de prueba mediante MSE
+#==============================================================
+
+# Predicciones OLS sobre test
+pred_ols <- predict(z_train, newdata = savings[test_idx,])
+# Error cuadrático medio (MSE): métrica para evaluar desempeño predictivo
+mse_ols <- mean((y_test - pred_ols)^2)
+
+# Predicciones Ridge sobre test usando lambda 1se para parsimonia
+pred_ridge <- predict(rridge_train, newx = X_test, s = "lambda.1se")
+mse_ridge <- mean((y_test - pred_ridge)^2)
+
+# Predicciones LASSO sobre test
+pred_lasso <- predict(rlasso_train, newx = X_test, s = "lambda.1se")
+mse_lasso <- mean((y_test - pred_lasso)^2)
+
+# Predicciones Elastic Net sobre test
+pred_en <- predict(rEN_train, newx = X_test, s = "lambda.1se")
+mse_en <- mean((y_test - pred_en)^2)
+
+#==============================================================
+# Comparación y visualización de resultados
+#==============================================================
+
+# Data frame con MSE de cada modelo para comparación cuantitativa
+results <- data.frame(
+  Modelo = c("OLS", "Ridge", "LASSO", "Elastic Net"),
+  MSE = c(mse_ols, mse_ridge, mse_lasso, mse_en)
+)
+print(results)
+
+# Gráficos de dispersión predicciones vs valores reales
+# La línea roja indica igualdad perfecta (predicción = valor real)
+par(mfrow = c(2, 2))  # Organizar gráficos en matriz 2x2
+
+plot(pred_ols, y_test, main = "OLS", xlab = "Predicción", ylab = "Real")
+abline(0, 1, col = "red")
+
+plot(pred_ridge, y_test, main = "Ridge", xlab = "Predicción", ylab = "Real")
+abline(0, 1, col = "red")
+
+plot(pred_lasso, y_test, main = "LASSO", xlab = "Predicción", ylab = "Real")
+abline(0, 1, col = "red")
+
+plot(pred_en, y_test, main = "Elastic Net", xlab = "Predicción", ylab = "Real")
+abline(0, 1, col = "red")
+
+#--------------------------------------------------------------
+# Interpretación:
+# - El MSE cuantifica el error promedio de predicción: menor MSE, mejor ajuste.
+# - OLS puede sobreajustar si hay multicolinealidad o variables irrelevantes.
+# - Ridge mejora al reducir varianza pero no hace selección.
+# - LASSO hace selección automática al eliminar coeficientes no útiles.
+# - Elastic Net combina ventajas de Ridge y LASSO para mejor rendimiento general.
+# - Los gráficos muestran qué tan cerca están las predicciones de los valores reales.
+
+#==============================================================
+#Pregunta 3: Modelos Aditivos y No Paramétricos
+#==============================================================
+#---------------------------------------------------------
+#a) Usando el conjunto de datos oecdpanel (si está disponible,
+# o simula un conjunto de datos similar con una relación no
+# lineal entre predictores y respuesta), ajusta un modelo aditivo
+# generalizado (GAM) para predecir la tasa de crecimiento económico
+# (growth) en función de la inversión (inv), el crecimiento de la
+# población (popgro), el PIB inicial (initgdp) y capital humano
+# (humancap) 1. Utiliza splines cúbicos para modelar las relaciones no lineales.
+#---------------------------------------------------------
+# Un Modelo Aditivo Generalizado (GAM) es una extensión de los modelos lineales que permite
+# capturar relaciones no lineales entre la variable respuesta y los predictores.
+#
+# En lugar de asumir que cada predictor tiene un efecto lineal, GAM permite que cada uno tenga
+# una forma funcional flexible, estimada a partir de los datos.
+#
+# La forma general es:
+#   E[Y] = α + f1(X1) + f2(X2) + ... + fn(Xn)
+# donde f1, f2, ..., fn son funciones suaves (por ejemplo, splines).
+#
+# Esto es útil cuando se sospecha que la relación entre X e Y no es estrictamente lineal.
+
+install.packages("oecdpanel")
+install.packages("AER")
+library(AER)
+library(mgcv)      # Para ajustar modelos GAM
+library(ggplot2)   # Para visualización opcional
+data("OECDGrowth")
+head(OECDGrowth)
+str(OECDGrowth)
+summary(OECDGrowth)
+OECDGrowth$growth <- log(OECDGrowth$gdp85) - log(OECDGrowth$gdp60) # crecimiento (es decir mejora del PIB en 1985 respecto a 1960)
+gam_model <- gam(growth ~
+                   s(invest, bs = "cr") +      # Inversión: spline cúbico
+                   s(popgrowth, bs = "cr") +   # Crecimiento poblacional: spline cúbico
+                   s(gdp60, bs = "cr") +       # PIB inicial: spline cúbico
+                   s(school, bs = "cr"),       # Capital humano: spline cúbico
+                 data = OECDGrowth)
+summary(gam_model)
+
+# El modelo GAM sugiere que existe una relación no lineal entre 'growth' y todas las variables:
+# especialmente 'invest', 'school' y 'gdp60' (por sus edf altos).
+# Sin embargo, los p-valores no muestran significancia estadística individual en los splines.
+# Aun así, el modelo tiene un ajuste global excelente (R² ajustado ≈ 98.5%, deviance ≈ 99.9%).
+# Esto puede deberse a un tamaño de muestra pequeño (n = 22), que reduce el poder estadístico.
+# Es recomendable visualizar los gráficos de las funciones suaves para interpretar mejor
+# cómo cada predictor afecta el crecimiento económico (no linealmente).
+
+#---------------------------------------------------------
+#b) Interpreta las funciones suaves estimadas para inv, popgro e initgdp.
+# ¿Qué patrones no lineales observas en la relación entre estos predictores
+# y la tasa de crecimiento económico?
+#---------------------------------------------------------
+plot(gam_model, se = TRUE, col = "blue")
+# invest (Inversión): Relación no lineal. El crecimiento económico es alto con baja inversión,
+# luego decrece hasta estabilizarse alrededor del valor 0.27 de inversión.
+
+# popgrowth (Crecimiento poblacional): Relación parcialmente no lineal.
+# Estable hasta cierto punto (~0.016), luego muestra una tendencia descendente.
+
+# gdp60 (PIB inicial en 1960): Relación no lineal.
+# Disminuye con valores bajos de PIB y se estabiliza a partir de ~8000.
+
+# school (Capital humano): Relación suave.
+# Ligeramente creciente hasta 0.08, luego se aplana o desciende un poco.
+
+# Elementos comunes en todas las gráficas:
+# - La línea azul indica la tendencia estimada.
+# - Las líneas punteadas representan el intervalo de confianza.
+# - Las marcas en el eje x ("ticks") muestran dónde se concentran los datos observados.
+
+# Conclusión general:
+# Cuando una función estimada tiene una forma pseudolineal (es decir, casi una línea recta),
+# indica que la relación entre esa variable y la respuesta podría ser bien explicada
+# por un modelo lineal. Sin embargo, el GAM permite verificar si existe alguna curvatura
+# sutil que un modelo lineal ignoraría. Estas formas también indican que la variable podría
+# tener un efecto constante o muy suave sobre la respuesta en el rango observado.
+
+#---------------------------------------------------------
+#c) Compara el rendimiento del GAM con un modelo de regresión lineal múltiple estándar
+# (sin funciones suaves). ¿El GAM mejora significativamente el ajuste a los datos?
+# Utiliza una prueba de hipótesis apropiada (por ejemplo, una prueba F)
+# para comparar los modelos.
+#---------------------------------------------------------
+# Ajustar el modelo lineal estándar (sin funciones suaves)
+lm_model <- lm(growth ~ invest + popgrowth + gdp60 + school, data = OECDGrowth)
+
+# Comparar con el modelo GAM usando una prueba F
+anova(lm_model, gam_model, test = "F")
+
+# el valor F obtenido:  21.69
+# el pvalor:  0.1072
+# el pvalor es >0.05 y mayor que 0.1 (los umbrales mas comunes)
+#podemos decir que el modelo gam no ofrece una mejora significativa
+# y que podriamos usar el modelo lineal sin perder demasiada explicabilidad
+
+#==============================================================
+#Pregunta 4: Descenso de Gradiente y Optimización
+#==============================================================
+#---------------------------------------------------------
+#a) Implementa el algoritmo de descenso de gradiente con "backtracking
+# line search" para minimizar la función:
+# f(x, y) = 1/2 (x^2 + γy^2), donde γ es un parámetro que puedes variar.
+#---------------------------------------------------------
+gamma <- 10
+x <- c(gamma, 1)       # Punto inicial x(0)
+eta <- 1e-6            # Criterio de convergencia
+max_iter <- 1000       # Número máximo de iteraciones
+
+alpha <- 0.3           # Parámetro de control (0, 0.5]
+beta <- 0.8            # Factor de reducción (0, 1)
+trajectory_bt <- matrix(NA, nrow = max_iter, ncol = 2)
+
+# Función objetivo: ahora recibe un vector x
+f <- function(x) {
+  1/2 * (x[1]^2 + gamma * x[2]^2)
+}
+
+# Gradiente de la función
+grad_f <- function(x) {
+  c(x[1], gamma * x[2])
+}
+
+# Bucle del algoritmo con backtracking
+for (k in 1:max_iter) {
+  grad <- grad_f(x)
+  direction <- -grad         # Dirección descendente
+  t <- 1                     # Paso inicial
+
+  # Backtracking line search
+  while (f(x + t * direction) > f(x) + alpha * t * sum(grad * direction)) {
+    t <- beta * t
+  }
+
+  x_new <- x + t * direction
+  trajectory_bt[k, ] <- x_new
+
+  # Criterio de parada
+  if (sqrt(sum((x_new - x)^2)) < eta) {
+    cat(sprintf("Convergencia con backtracking en %d iteraciones\n", k))
+    x <- x_new
+    break
+  }
+
+  x <- x_new
+}
+
+# Solución final
+cat(sprintf("Solución final: x = (%.6f, %.6f)\n", x[1], x[2]))
+
+# - El algoritmo comienza en el punto inicial x = (2, 1).
+# - Aplica descenso de gradiente con búsqueda de paso "backtracking" para minimizar la función f(x, y) = 1/2 (x^2 + 2*y^2).
+# - En cada iteración ajusta el tamaño del paso para garantizar una disminución suficiente de la función.
+# - La condición de parada es que el cambio entre iteraciones sea muy pequeño (menos que 1e-6).
+# - El mensaje "Convergencia con backtracking en 14 iteraciones" indica que el algoritmo encontró un mínimo en solo 14 pasos.
+# - La solución final es x = (0.000000, 0.000000), que es el mínimo global esperado, ya que la función es convexa y mínima en el origen.
+#
+# En resumen, el algoritmo funcionó correctamente y encontró el mínimo de la función rápidamente.
+
+#---------------------------------------------------------
+#b) Experimenta con diferentes valores de γ (por ejemplo, γ = 0.1, 1, 10)
+# y diferentes valores de los parámetros α y β en el
+# "backtracking line search".
+# ¿Cómo afectan estos parámetros a la velocidad de convergencia del algoritmo?
+#---------------------------------------------------------
+# con gamma=0.1:
+#Convergencia con backtracking en 111 iteraciones
+#Solucion final: x = (0.000000, 0.000008)
+# vemos que ahora converge mucho mas lento
+
+#con gamma = 1
+#Convergencia con backtracking en 2 iteraciones
+#Soluci�n final: x = (0.000000, 0.000000)
+# converge mucho mas rapido
+
+# con gamma = 10:
+#Convergencia con backtracking en 75 iteraciones
+#Soluci�n final: x = (0.000002, -0.000000)
+#converge mas rapido que con gamma = 0.1 pero mas lento q con gamma=1
+
+#conclusion final:
+# El parámetro gamma afecta la "curvatura" o la forma de la función en la dirección y.
+# Esto influye directamente en la geometría del problema y, por tanto, en la dificultad del
+# descenso de gradiente para encontrar el mínimo.
+
+# - Cuando gamma es pequeño (por ejemplo, 0.1):
+#   La curvatura en la dirección y es muy baja (la función es "plana" en esa dirección).
+#   Esto genera un "valle alargado" o una región con pendiente muy pequeña en y.
+#   Por eso el algoritmo avanza lentamente en esa dirección y tarda más en converger.
+#   Se requieren muchas iteraciones para ajustar y acercarse al mínimo, aunque
+#   finalmente converge muy cerca del origen.
+
+# - Cuando gamma es 1:
+#   La curvatura en ambas direcciones (x y y) es igual.
+#   La función es más "simétrica" y el descenso de gradiente se mueve con rapidez y eficiencia.
+#   Esto permite una convergencia muy rápida (pocos pasos) hacia el mínimo en el origen.
+
+# - Cuando gamma es grande (por ejemplo, 10):
+#   La función tiene una alta curvatura en la dirección y, lo que genera un "valle estrecho".
+#   El gradiente en y es mucho más pronunciado que en x, y el algoritmo debe tomar pasos más
+#   pequeños para evitar "sobrepasar" el mínimo en esa dirección.
+#   Por tanto, la convergencia es más lenta que con gamma=1, pero más rápida que cuando gamma es muy pequeño.
+
+# En resumen:
+# - La velocidad de convergencia depende de la relación entre las curvaturas en cada dirección.
+# - Cuando la curvatura es equilibrada (gamma cerca de 1), la convergencia es rápida.
+# - Cuando la curvatura es muy diferente en las direcciones (gamma muy pequeño o muy grande),
+#   la convergencia es más lenta debido a la geometría del problema que dificulta el avance uniforme.
+# Esto es un fenómeno clásico en optimización conocido como "condicionamiento" del problema.
+
+# Por eso, variar gamma cambia tanto el número de iteraciones necesarias para converger
+# como la precisión final en el mínimo.
+
