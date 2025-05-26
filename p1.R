@@ -24,20 +24,39 @@ summary(KorTemp)
 # suma residual de cuadrados
 z <- lm(FTMax ~ LWS + LRadSol + LLH + LTMax + LRHmax + LTmin, data = KorTemp)
 summary(z)
-confint(z)
+
+coef(z) #coeficientes del modelo
+
+fitted(z) #ajustamos el modelo
+residuals(z) #obtenemos los residuos del problema
+RSS <- sum(residuals(z)^2)
+n <- nrow(KorTemp)
+p <- length(coef(KorTemp)) - 1
+RSE <- sqrt(RSS / (n - p - 1))
+RSE
+
+confint(z) #intervalos de confianza a 95%
+
+
+
 
 # b
 # Calcula el valor del coeficiente de correlación de Pearson entre la variable respuesta Y
 #y el predictor X1.
+cor(KorTemp$FTMax, KorTemp$LWS) #coeficiente de correlacion entre FTMAX(y) y LWS(X1)
 
 # c
 #  Define y calcula el coeficiente de correlación parcial entre X1 y X2, controlando por el
 # resto de las variables explicativas.
 
+
 # d
 # Considera un modelo reducido que contiene solo un subconjunto de las variables explicativas incluidas en el modelo completo. Formula y contrasta, mediante un test t, la
 # hipótesis nula de que los coeficientes asociados a las variables excluidas son iguales a
 # cero.
+
+z1 <- lm(FTMax ~ LWS + LRadSol + LLH + LTMax + LRHmax, data = KorTemp) # generamos unn nuevo modelo sin la variable LTmin
+
 
 # e
 # Compara el modelo completo con el modelo reducido mediante un test F. Expón claramente la hipótesis nula, calcula el estadístico de contraste, determina el valor crítico
