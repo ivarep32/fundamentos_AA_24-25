@@ -27,15 +27,38 @@ summary(z) #Todas las variables que observamos están en un rango para ser consi
 
 coef(z) #coeficientes del modelo
 
+X <- model.matrix(z)
+n <- nrow(X);n
+p <- ncol(X);p
+
+XtXi <- solve(t(X) %*% X)
+H <- X %*% XtXi %*% t(X)
+
+y <- KorTemp$FTMax
+hbeta <- XtXi %*% t(X) %*% y
+hbeta #coeficientes
+
 fitted(z) #ajustamos el modelo
+
 residuals(z) #obtenemos los residuos del problema
-RSS <- sum(residuals(z)^2)
-n <- nrow(KorTemp)
-p <- length(coef(KorTemp)) - 1
-RSE <- sqrt(RSS / (n - p - 1))
-RSE
+RSS <- sum(residuals(z)^2); RSS #suma residual de cuadrados
+RSS <- t(y - X %*% hbeta) %*% (y - X %*% hbeta);RSS
+
 
 confint(z) #intervalos de confianza a 95%
+sigma2 <- RSS / (n - p)
+sigma2
+
+ET <- sqrt(rep(sigma2, length(diag(XtXi))) * diag(XtXi));ET
+niv <- 0.95
+t <- qt(1-(1-niv)/2,n-p);t
+#extremos inferiores de los intervalos de confianza para los coficientes
+betainf <- beta-t*ET
+#extremos superiores
+betasup <- beta+t*ET
+
+betainf
+betasup
 
 
 # b
@@ -73,6 +96,8 @@ summary(z1)$adj.r.squared #0.4730303
 
 #f
 # Compara el coeficiente de determinación ajustado para ambos modelos
+
+
 
 
 # 2
