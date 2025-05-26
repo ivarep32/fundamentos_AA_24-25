@@ -48,7 +48,13 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
 | `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión                               |
 | `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
-| `script 8`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada   (no se hizo)                    |
+| `KorTemp.RData`     | `-`                  | Datos utilizados en el examen final curso 24/25                       |
+| `Parte1`     | `-`                  | Primeros dos ejercicios del final 24/25                      |
+| `Parte2`     | `-`                  | Tres ultimos ejercicios final 24/25                    |
+| `FAA2025_Mayo`     | `-`                  | Enunciado examen final 24/25                       |
+
+
+
 
 ## 🕯️Enlace para poner una vela en la catedral de santiago (necesario)
 https://velas.catedraldesantiago.es/es/enciende-una-vela
