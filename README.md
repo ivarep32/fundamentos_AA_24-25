@@ -48,7 +48,9 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `script 5`     | `S5_AA_IA_2425`                  | Análisis de Regresión Lineal General con R                                                   |
 | `script 6`     | `S6_AA_IA_2425`                  | Diagnosis  de  observaciones  atípicas  o  inﬂuyentes Regresión                               |
 | `script 7`     | `AA_Clasificacion supervisada`                  | Clasificacion supervisada                       |
-| `script 8`     | `AA_Clasificacion no supervisada`                  | Clasificacion no supervisada   (no se hizo)                    |
+| `Parte 1 `     | `-`                  | Primera mitad examen final mayo 2025 (ej. 1 y 2)           |
+| `Parte 2 `     | `-`                  | Segunda mitad examen final mayo 2025  (resto)            |
+| `FAA2025_Mayo`     | `-`                  | Enunciado examen mayo 2025            |
 
 ## 🕯️Enlace para poner una vela en la catedral de santiago (necesario)
 https://velas.catedraldesantiago.es/es/enciende-una-vela
