@@ -51,6 +51,8 @@ Ambos son productos de JetBrains, y **como estudiantes tenéis licencia gratuita
 | `Parte 1 `     | `-`                  | Primera mitad examen final mayo 2025 (ej. 1 y 2)           |
 | `Parte 2 `     | `-`                  | Segunda mitad examen final mayo 2025  (resto)            |
 | `FAA2025_Mayo`     | `-`                  | Enunciado examen mayo 2025            |
+| `examenparcial_martin.R`     | `-`                  | Examen parcial curso 24/25 (MJ Ginzo)            |
+
 
 ## 🕯️Enlace para poner una vela en la catedral de santiago (necesario)
 https://velas.catedraldesantiago.es/es/enciende-una-vela
