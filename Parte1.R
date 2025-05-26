@@ -5,7 +5,7 @@ A2= sample(1:25,3)
 load("KorTemp.RData")
 lmues=sample(1:nrow(KorTemp),300)
 #=================================================================================
-#  Se desea predecir la temperatura máxima futura (FTMax), en función de variables 
+#  Se desea predecir la temperatura máxima futura (FTMax), en función de variables
 #  meteorológicas del último periodo. Ajusta por el metodo de mínimos cuadrados el siguiente
 #  modelo de regresión múltiple: Y = β0 + β1X1 + β2X2 + β3X3 + β4X4 + β5X5 + β6X6 + ε
 #  donde: X1 = LWS; X2 = LRadSol; X3 = LLH; X4 = LTMax; X5 = LRHmax y X6 = LTmin
