@@ -9,6 +9,11 @@ str(KorTemp)
 str(lmues)
 summary(KorTemp)
 
+# 3
+# (1 pto) Calcula un módelo de regresión para explicar (A1=0:FTMax, A1=1:FTmin) con las variables del último período disponible (empiezan por L), con el objetivo de usar el mejor modelo
+# con el menor número de covariables. Explica el proceso seguido, las elecciones tomadas y
+# los resultados obtenidos.
+
 # 4
 # (1 pto) Seleccionando las filas del conjunto de datos dada por lmues: KorTemp[lmues,],
 # estimar un modelo de regresión no lineal para explicar (A1=0:FTMax, A1=1:FTmin) usando la

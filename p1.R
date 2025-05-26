@@ -56,7 +56,6 @@ t <- qt(1-(1-niv)/2,n-p);t
 betainf <- beta-t*ET
 #extremos superiores
 betasup <- beta+t*ET
-
 betainf
 betasup
 
@@ -76,6 +75,10 @@ summary(r_x2)
 cor(r_x1,r_x2)
 # los rangos de r_x1 son mucho más acotados que r_x2, esto indica que el modelo para LWS,
 # ajusta mucho mejor o hay menos variabilidad en LWS, los valores de
+install.packages("ppcor", dep=TRUE)
+library(ppcor)
+corr_parcial_matrix = pcor(cbind(KorTemp$LWS, KorTemp$LRadSol,KorTemp$LLH, KorTemp$LTMax, KorTemp$LRHmax, KorTemp$LTmin))
+corr_parcial_matrix$estimate[1,2]
 
 # d
 # Considera un modelo reducido que contiene solo un subconjunto de las variables explicativas incluidas en el modelo completo. Formula y contrasta, mediante un test t, la
@@ -90,13 +93,23 @@ summary(z1)
 # e
 # Compara el modelo completo con el modelo reducido mediante un test F. Expón claramente la hipótesis nula, calcula el estadístico de contraste, determina el valor crítico
 # correspondiente y extrae las conclusiones en función del resultado del test
-summary(z)$adj.r.squared #0.5019794
-summary(z1)$adj.r.squared #0.4730303
-#podemos observar que se reduce la explicatividad en entorno a en 3%
+rss0 <- deviance(z1); rss0
+rss <- deviance(z)
+rss0-rss
+
+f <- ((rss0-rss)/2) / (rss/(n-p));f
+pvalue <- 1-pf(f,2,n-p)
+pvalue
+
+anova(z1,z)
+# la varación que anova nos devuele que el pvalue indica que es sifnificativo y la variacion que apreciamos es de 38415 a 36300,
+# reduce la precision btte
 
 #f
 # Compara el coeficiente de determinación ajustado para ambos modelos
-
+summary(z)$adj.r.squared #0.5019794
+summary(z1)$adj.r.squared #0.4730303
+#podemos observar que se reduce la explicatividad en entorno a en 3%
 
 
 
@@ -126,10 +139,10 @@ biplot(pca)
 # la última componente proporciona valores altos para el v iento y la radiacion solar, pero cuando el viento en positivo y
 # la radiacion solar en negativo, parece indicar que los periodos con vieto son los que tienen una menor radiacion solar
 
+meses <- droplevels(KorTemp$mes);meses
+par(mfrow=c(1,2))
+plot(meses, pca$scores[,1])
+plot(meses, pca$scores[,2])
 
-# 3
-# (1 pto) Calcula un módelo de regresión para explicar (A1=0:FTMax, A1=1:FTmin) con las variables del último período disponible (empiezan por L), con el objetivo de usar el mejor modelo
-# con el menor número de covariables. Explica el proceso seguido, las elecciones tomadas y
-# los resultados obtenidos.
 
 
