@@ -14,6 +14,7 @@ summary(KorTemp)
 # estimar un modelo de regresión no lineal para explicar (A1=0:FTMax, A1=1:FTmin) usando la
 # variable LRadSol. Comenta las opciones elegidas y dibuja el modelo de regresión obtenido
 # sobre los datos originales.
+datos_lmues <- KorTemp[lmues, ]
 
 
 # 5

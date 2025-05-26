@@ -1,7 +1,7 @@
 midni = 1413
 set.seed(midni)
-A1= midni %% 2
-A2= sample(1:25,3)
+A1= midni %% 2;A1
+A2= sample(1:25,3);A2
 load("KorTemp.RData")
 lmues=sample(1:nrow(KorTemp),300)
 summary(lmues)
@@ -88,7 +88,20 @@ screeplot(pca, type="lines")
 summary(pca) # a partir de la PC4 suman un acumulado de más de 75%, 78.72% concretamente
 
 pca$rotation[,1:4]
+biplot(pca)
 # los valores en el primer componente son positivos para LTMax,LTMin,LTMax_D,LTmin_D
+# tiene sentido que los valores de temperatura se agrupen y esten relacionados, en un año muy cálido no debería
+# tener las temperaturas más bajas y también tiene lógica que dependa de la temperatura anterior, no tendría mucho sentido
+# grandes cambios de temperatura
+# el flujo de calor parece carecer de relacion con las demas variables, por lo menos en los dos primeros componentes, pero en la tercera
+# podemos observar q los valores con un flujo de calor muy negativo se relacionan con aquellos con valores de humedad maxima más baja
+# y una radiacion solar alta
+# de nuevo LRHmax, LRHmin, LWS parecen estar relacionadas, las dos primeras son variables de humedad así que esto tiene
+# sentido y parece que le viento también tiene una relación con ellas
+# la última componente proporciona valores altos para el v iento y la radiacion solar, pero cuando el viento en positivo y
+# la radiacion solar en negativo, parece indicar que los periodos con vieto son los que tienen una menor radiacion solar
+
+
 # 3
 # (1 pto) Calcula un módelo de regresión para explicar (A1=0:FTMax, A1=1:FTmin) con las variables del último período disponible (empiezan por L), con el objetivo de usar el mejor modelo
 # con el menor número de covariables. Explica el proceso seguido, las elecciones tomadas y
