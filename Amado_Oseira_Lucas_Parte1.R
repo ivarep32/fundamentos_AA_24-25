@@ -143,6 +143,7 @@ meses <- droplevels(KorTemp$mes);meses
 par(mfrow=c(1,2))
 plot(meses, pca$scores[,1])
 plot(meses, pca$scores[,2])
+#los vlaores de julio son mayores que los de agosto ademas de que la caja es más pequeña
 
 
 
