@@ -12,3 +12,6 @@ ahora entendo pq os homes temos pelo nas pernas, pa q nn se vexa o color dun mor
 
 
 dice maria q se le colo un FTMax en el ejercicio 1 apartado d
+
+De PC2 nn puxen gran cousa pq nn se percibe, de feito no ggplot nin o mencionei, igual comentalo nn viña mal
+PC2 no separa claramente por región, pero puede captar factores adicionales (crecimiento, estabilidad)
