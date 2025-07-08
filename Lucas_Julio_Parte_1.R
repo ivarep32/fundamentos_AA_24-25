@@ -120,3 +120,21 @@ summary(z1)$adj.r.squared #0.7943899
 # 2. Calcula las componentes principales de las variables numéricas (excepto country y Region)
 # e interpreta aquellas que conjuntamente expliquen al menos un 90 % de la variabilidad total.
 # Dibuja las dos primeras componentes principales en función del continente (Region) (1.5ptos).
+
+datos_numericos <- csv[, !names(csv) %in% c("country", "Region")]
+
+# Análisis de componentes principales
+pca <- prcomp(datos_numericos, scale. = TRUE)
+
+# Resumen de varianza explicada
+summary(pca)
+# Obervamos que superamos el 90% de la variabilidad con los tres primeros elementos (93.58%)
+
+screeplot(pca)
+screeplot(pca, type="lines")
+# Podríamos ver que le codo se forma ya en el paso de de la primera a la segunda componente pero el salto entre la
+# tercera y la cuarta también es considerable, se reduce el porcentaje de varianza de un 12,54% a un 3,121%.
+
+
+pca$rotation[,1:4]
+biplot(pca)
