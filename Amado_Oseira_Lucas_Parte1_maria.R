@@ -119,21 +119,4 @@ summary(reduced_model) # R^2 = 0.7999
 summary(full_model) # R^2 = 0.7986
 
 # Al comprobar los coeficientes de determinación de ambos modelos, podemos comprobar
-# que el modelo modelo reducido explica un poco mejor la varianza de lCO2 (0.7999 > 0.7986),
-
-
-#2.Calcula las componentes principales de las variables numéricas (excepto country y Region)
-#e interpreta aquellas que conjuntamente expliquen al menos un 90 % de la variabilidad total.
-#Dibuja las dos primeras componentes principales en función del continente (Region)
-
-# Excluye las variables categóricas
-numeric_data <- dat[, !(names(dat) %in% c("country", "Region"))]
-
-# Nos aseguramos de que todo sea numérico
-numeric_data <- data.frame(lapply(numeric_data, as.numeric))
-
-# Eliminamos filas con NA
-numeric_data <- na.omit(numeric_data)
-
-test.pca <- prcomp(numeric_data, scale. = TRUE)
-summary(test.pca)
+# que el modelo modelo reducido explica un poco mejor la varianza de inflation (0.7999 > 0.7986),
