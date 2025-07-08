@@ -73,7 +73,17 @@ cor(csv$lCO2, csv$inflation) #coeficiente de correlacion entre lCO2(y) y inflati
 # c) Define y calcula el coeficiente de correlación parcial entre X1 y X2, controlando por el
 # resto de las variables explicativas.
 
+r_x1 <- residuals(lm( inflation ~ GDP.growth + internet + lagv, data = csv))
+summary(r_x1)
+r_x2 <- residuals(lm( lGDPc ~ GDP.growth + internet + lagv, data = csv))
+summary(r_x2)
+cor(r_x1,r_x2)
 
+
+install.packages("ppcor", dep=TRUE)
+library(ppcor)
+corr_parcial_matrix = pcor(cbind(csv$inflation, csv$lGDPc,csv$GDP.growth, csv$internet, csv$lagv))
+corr_parcial_matrix$estimate[1,2]
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -81,6 +91,8 @@ cor(csv$lCO2, csv$inflation) #coeficiente de correlacion entre lCO2(y) y inflati
 # incluidas en el modelo completo. Formula y contrasta, mediante un test t, la
 # hipótesis nula de que los coeficientes asociados a las variables excluidas son iguales a
 # cero.
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
