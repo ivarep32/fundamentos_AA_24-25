@@ -9,22 +9,24 @@ head(csv)
 # variables? (1 pto).
 
 # paquete necesario
+install.packages("np", dep=TRUE)
 library(np)
 
 # ajuste no parametrico
-modelo_np <- npreg(lCO2 ~ internet, data = datos, regtype = "lc")
+modelo_np <- npreg(lCO2 ~ internet, data = csv, regtype = "lc")
 
 # Gráfico del ajuste
-plot(datos$internet, datos$lCO2, main = "regresion no parametrica", xlab = "% Internet", ylab = "log(CO2)")
-lines(datos$internet[order(datos$internet)],
-      fitted(modelo_np)[order(datos$internet)], col = "blue", lwd = 2)
+plot(csv$internet, csv$lCO2, main = "regresion no parametrica", xlab = "% Internet", ylab = "log(CO2)")
+lines(csv$internet[order(csv$internet)],
+      fitted(modelo_np)[order(csv$internet)], col = "blue", lwd = 2)
 
-# El gráfico muestra una relación claramente no lineal entre el porcentaje de
-# usuarios de internet y las emisiones de CO₂ per cápita (logarítmicas).
-# En niveles bajos de acceso, el aumento del uso de internet se asocia con un fuerte
-# incremento de emisiones, mientras que en niveles altos este efecto se estabiliza.
-# Por tanto, no es apropiado suponer una relación lineal entre ambas variables, y el
-# uso de modelos no paramétricos es más adecuado en este caso.
+# Este gráfico muestra una relación no lineal entre el el número de usuarios con internet y las emisiones de CO2 per cápita
+# dibujando una función logarítmica, de nuevo esto podría reflejar el desarrollo económico, ya que una mayor disponibilidad
+# y uso de internet tiende a reflejar un país más desarrollado económicamente, pero el desarrollo económico una vez se alcanza
+# cierto nivel, se tiende a prescindir de la industria y centrarse en el sector servicios eso explicaria por que la grafica
+# se aplana. En cualquer caso el suo de modelos no paramétricos es más adecuado en este caso por suponer una relación lineal
+# entre ambas variables.
+
 
 # ==================================================================================================================== #
 
@@ -32,7 +34,7 @@ lines(datos$internet[order(datos$internet)],
 # el objetivo de usar el menor número de covariables. (1 pto).
 
 # modelo completo
-modelo <- lm(lCO2 ~ inflation + lGDPc + GDP.growth + internet + lagv, data = datos)
+modelo <- lm(lCO2 ~ inflation + lGDPc + GDP.growth + internet + lagv, data = csv)
 summary(modelo)
 # Coefficients:
 #               Estimate Std. Error t value Pr(>|t|)
@@ -49,11 +51,12 @@ summary(modelo)
 # Multiple R-squared:  0.8048,    Adjusted R-squared:  0.7986
 # F-statistic: 128.7 on 5 and 156 DF,  p-value: < 2.2e-16
 
-# viendo esta tabla, podemos eliminar las variables de menor valor estadistico,
-# es decir aquellas de mayor pvalor, siendo estas Internet (0.97) y GDP.growth(0.55).
+# En esta tabla observamos las variables con menor valor estadístico (más prescindibles), por tener menor pvalor son:
+# Internet (0.97) y GDP.growth(0.55).
+
 
 #modelo sin las variables no significativas
-modelo_reducido <- lm(lCO2 ~ inflation + lGDPc + lagv, data = datos)
+modelo_reducido <- lm(lCO2 ~ inflation + lGDPc + lagv, data = csv)
 summary(modelo_reducido)
 
 # anova para comparar ambos modelos
@@ -64,8 +67,8 @@ anova(modelo_reducido, modelo)
 # 1    158 81.002
 # 2    156 80.809  2    0.1929 0.1862 0.8303
 
-#El test F muestra un p-valor de 0.83, no podriamos decir que añadir GDP.growth e
-# internet mejore el modelo. Por tanto, el modelo reducido es suficiente
+# El test F tiene un p-valor de 0.83, no podriamos decir que añadir GDP.growth e internet mejore el modelo.
+# Es decir , el modelo reducido es suficiente
 
 # comprobamos tambien el R2
 summary(modelo)$adj.r.squared # 0.799
@@ -83,7 +86,7 @@ summary(modelo_reducido)$adj.r.squared #0.800
 # los países que NO han entrado en el modelo (América y Oceanía) (1 pto).
 
 # quitamos america y oceania
-datos_filtrados <- subset(datos, !(Region %in% c("AM", "OC")))
+datos_filtrados <- subset(csv, !(Region %in% c("AM", "OC")))
 table(datos_filtrados$Region) #para ver que no sale ni AM ni OC
 
 # recogemos las variables numericas
@@ -105,15 +108,15 @@ pred_lda <- predict(modelo_lda)$class
 # Matrices de confusión
 table(Predicho = pred_nb, Real = datos_filtrados$Region)
 table(Predicho = pred_lda, Real = datos_filtrados$Region)
-# Observamos que LDA presenta un rendimiento ligeramente superior a Naive Bayes.
-# En la clase Europa (EU): LDA clasifica correctamente 34 países, Naive Bayes 33, pero comete más errores
-# (mal clasifica 13 países como EU).
 
-# En África (AF), LDA acierta 38 casos frente a los 37 de Naive Bayes.
+# Podemos ver que LDA tiene un rendimiento un poco superior a Naive Bayes.
+# En Europa, LDA acierta con 34 y NB acierta 33, pero se equivoca más con 13 fallos.
 
-# En Asia (AS), LDA mejora sustancialmente el acierto (16 vs 10) y reduce errores frente a Naive Bayes.
+# En África, LDA acierta 38 veces frente a los 37 de Naive Bayes.
 
-# En general, LDA comete menos errores cruzados y distribuye mejor las clases.
+# En Asia , LDA mejora sustancialmente el acierto (LDA - 16 vs NB - 10) y reduce errores frente a Naive Bayes.
+
+# En general, podemos afirmar que comete menos errores LDA y tiene menos casos cruzados
 
 # paises europeos mal clasificados (Region == "EU").
 datos_filtrados$Mal_NB <- pred_nb != datos_filtrados$Region
@@ -136,14 +139,14 @@ subset(datos_filtrados, Region == "EU" & (Mal_NB | Mal_LDA))
 
 
 # hacemos el estudio con AM y OC
-datos_test <- subset(datos, Region %in% c("AM", "OC"))
+datos_test <- subset(csv, Region %in% c("AM", "OC"))
 pred_test_nb <- predict(modelo_nb, newdata = datos_test[, vars_num])
 pred_test_lda <- predict(modelo_lda, newdata = datos_test[, vars_num])
 
 # predicciones
 cbind(Pais = datos_test$country, Region_Real = datos_test$Region,
       Pred_NB = pred_test_nb, Pred_MN = pred_lda)
-#Se observa una gran dispersión en las predicciones. Naive Bayes tiende a clasificarlos como europeos (3)
+# Se observa una gran dispersión en las predicciones. Naive Bayes tiende a clasificarlos como europeos (3)
 # LDA los reparte entre África (1), Asia (2) y Europa (3)
 # Esto indica que los modelos no generalizan bien a regiones no vistas y que las variables usadas
 # no capturan con claridad las diferencias regionales en estos casos.
