@@ -104,14 +104,19 @@ summary(z1)
 # Expón claramente la hipótesis nula, calcula el estadístico de contraste, determina el valor crítico
 # correspondiente y extrae las conclusiones en función del resultado del test.
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # f) Compara el coeficiente de determinación ajustado para ambos modelos.
+
+summary(z)$adj.r.squared #0.7985854
+summary(z1)$adj.r.squared #0.7943899
+#podemos observar que se reduce la explicatividad se reduce de forma mínima
+
 # Compara todos los resultados que obtienes con sus versiones manuales, verifica que coinciden e interpeta los resultados (2.5 ptos).
 
 # ==================================================================================================================== #
 
 # 2. Calcula las componentes principales de las variables numéricas (excepto country y Region)
 # e interpreta aquellas que conjuntamente expliquen al menos un 90 % de la variabilidad total.
-# Dibuja las dos primeras componentes principales en función del continente (Region) (1.5
-# ptos).
+# Dibuja las dos primeras componentes principales en función del continente (Region) (1.5ptos).
