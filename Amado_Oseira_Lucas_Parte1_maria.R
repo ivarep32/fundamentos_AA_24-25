@@ -163,41 +163,33 @@ names(test.pca)
 #Seleccionamos solo las componentes que necesitamos
 test.pca$rotation[,1:3]
 
-# Observamos como los valores son positivos en el primer componente para LTMax, LTMin, LTMax_D y LTmin_D
-# Esto indica que están positivamente correlacionados con el primer componente (LTMax), y por lo tanto
+# Observamos como los valores son positivos en el primer componente para lCO2, lGDPc e internet
+# Esto indica que están positivamente correlacionados con el primer componente (lCO2), y por lo tanto
 # tienden a aumentar en la misma dirección, mientras que el resto de  componentes contribuyen en la dirección
 # opuesta a este primer componente.
 
 biplot(test.pca)
 
-#Las temperaturas min y max están relacionadas, lo cual es lógico ya que cuanta más calor menos temperaturas
-#bajas habrá.
+#PC1 representa un eje de desarrollo económico. Las variables más alineadas con dicho desarrollo
+#son: lGDPc, internet, lCO2, y hay una fuerte correlación entre ellas, siendo muy semejantes.
+#Inflación, agricultura y crecimiento están más presentes en países menos desarrollados.
+#PC2 en cambio no es tan relevante ni fácil de interpretar.
 
-#Por otra parte, los valores de la humedad relativa min y max también se agrupan, siendo semejantes,
-#además de que la velocidad de viento influye en ellas, aumentando y disminuyendo a la vez que estas dos.
+# Añadimos la región al resultado del PCA
+pca_data <- data.frame(test.pca$x[, 1:2], Region = dat$Region)
 
-pt <- data.frame(test.pca$x[, 1:2], mes = KorTemp$mes)
-
-# Puntuaciones coloreadas de cada mes de las 2 primeras variables
-library(ggplot2)
-
-ggplot(pt, aes(x = PC1, y = PC2, color = mes)) +
-  geom_point(alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Puntuaciones coloreadas de cada mes")
-
-
-# En el gráfico vemos como se reparten los datos entre los meses de julio (azul) y agosto (rojo).
-# En este último mes, la nube es más dispersa y tiende a menores valores de ambas componentes.
-
-# Añade la región al resultado del PCA
-pca_data <- data.frame(pca$x[, 1:2], Region = dat$Region)
-
-# Instala y carga ggplot2 si no lo tienes
-# install.packages("ggplot2")
 library(ggplot2)
 
 ggplot(pca_data, aes(x = PC1, y = PC2, color = Region)) +
   geom_point(size = 3) +
   labs(title = "PCA - Primeras dos componentes", x = "PC1", y = "PC2") +
   theme_minimal()
+
+#Este gráfico muestra una representación de los países proyectados en las dos primeras componentes
+#principales (PC1 y PC2), coloreados según su continente (Region), lo que nos permite identificar patrones
+#regionales y agrupamientos.
+
+#PC1 capta el eje desarrollo económico y separa claramente regiones como Europa y África.
+#Europa y Oceanía se agrupan a la derecha, lo que implica un alto desarrollo, por el contrario, África y
+#parte de Asia están a la izquierda por contar con un desarrollo inferior.
+#Además, América y Asia tienen diversidad interna alta, pues incluyen tanto países ricos como pobres.
