@@ -92,6 +92,10 @@ corr_parcial_matrix$estimate[1,2]
 # hipótesis nula de que los coeficientes asociados a las variables excluidas son iguales a
 # cero.
 
+z1 <- lm(lCO2 ~ inflation + lGDPc + GDP.growth + internet, data = csv) # generamos unn nuevo modelo sin la variable lagv
+summary(z)
+summary(z1)
+# Observamos cambios en los valores las variables pero ningún cambio de signo, podríamos decir que no apreciamos fenómeno de confusión
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
