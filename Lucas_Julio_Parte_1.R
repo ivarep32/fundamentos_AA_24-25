@@ -16,10 +16,10 @@ head(csv)
 
 z <- lm(lCO2 ~ inflation + lGDPc + GDP.growth + internet + lagv, data = csv)
 
-# coeficientes automáticos
+# COEFICIENTES
 coef(z)
 
-# coeficientes manuales
+# COEFICIENTES MANUALES
 X <- model.matrix(z)
 n <- nrow(X);n
 p <- ncol(X);p
@@ -31,17 +31,27 @@ y <- csv$lCO2
 hbeta <- XtXi %*% t(X) %*% y
 hbeta
 
-# suma residual de cuadrados automáticos
+# Los valores de internet, inflation y GDP.growth son muy pequeños, no deberían ser significantes.
+# El valor de lGDPc es postivo y muy grande, indica que los paises ricos (con un alto PIB per cápita) tienen una mayor
+# emisión de CO2 per cápita, lo que tendría sentido, ya que los países más pobres suelen contar con menor industria e
+# infraestructura que siendo estos muy contaminantes. Un país plenamente dedicado a la ganadería y la agricultura, no
+# debería tener tanta contaminación.
+# Rl valor de lagv(% contribución de la Agricultura al PIB) sigue siendo importante y es negativo, esta relación no es
+# tan fuerte, pero confirma lo dicho anteriormente, los países ricos suelen tener su economía basada principalmente en
+# el sector secundario y terciario, los más pobres en el primario, como la agricultura,
+# refuerza la conclusiones anteriores.
+
+# SUMA RESIDUAL DE CUADRADOS
 residuals(z) #obtenemos los residuos del problema
 RSS <- sum(residuals(z)^2); RSS #suma residual de cuadrados
 
-# suma residual de cuadrados manuales
+# SUMA DRESIDUAL DE CUADRADOS MANUAL
 RSS <- t(y - X %*% hbeta) %*% (y - X %*% hbeta);RSS
 
-# intervalos confianza automáticos
+# INTERVALOS DE CONFIANZA
 confint(z)
 
-# intervalos confianza manuales
+# INTERVALOS DE CONFIANZA MANUALES
 sigma2 <- RSS / (n - p)
 sigma2
 
@@ -55,10 +65,13 @@ betainf
 betasup <- hbeta + t * ET #extremos superiores
 betasup
 
-# valores ajustados automáticos
+# Estos valores representan el valor máximo y mínimo de cada una de las variables para el 95% de los datos, se toman los
+# datos centrales, es decir, omitimos los 2,5% más bajos y más altos que suelen incluir valores más extremos.
+
+# VALORES AJUSTADOS
 fitted(z)
 
-# valores ajustados manuales
+# VALORES AJUSTADOS MANUALES
 yhat <- X %*% hbeta; yhat
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -109,7 +122,7 @@ reduced_model <- lm(csv$lCO2 ~ csv$inflation + csv$lGDPc + csv$GDP.growth + csv$
 # Resumen del modelo reducido
 summary(reduced_model)
 
-# Formulando la hipótesis de que el modelo podría explicar la misma varianza de FTMax siendo su coeficiente X4 igual a 0,
+# Formulando la hipótesis de que el modelo podría explicar la misma varianza de lCO2 siendo su coeficiente X4 igual a 0,
 # observamos que el p-valor mostrado en el summary full_model es < 2.2e-16, esto indica que las  probabilidades de que
 # la hipótesis nula sea cierta son bajas, por lo que podríamos concluír que la variable X4 hace una aportación
 # importante en nuestro modelo. Sin embargo, todavía podemos probar a eliminar X3, por ser una variable poco significativa.
@@ -170,7 +183,7 @@ summary(z) # R^2 = 0.7986
 # Dibuja las dos primeras componentes principales en función del continente (Region) (1.5ptos).
 
 # Excluye las variables categóricas
-numeric_data <- dat[, !(names(dat) %in% c("country", "Region"))]
+numeric_data <- csv[, !(names(csv) %in% c("country", "Region"))]
 
 # Nos aseguramos de que todo sea numérico
 numeric_data <- data.frame(lapply(numeric_data, as.numeric))
@@ -192,25 +205,32 @@ summary(test.pca)
 #Con las primeras 3 componentes alcanzamos el 93.58% de la variabilidad
 
 screeplot(test.pca)
+
+# Tomamos los 3 componentes principales aunque podemos observar que el codo ya se forma en el paso de la primera a la
+# segunda componente. También se aprecia un salto importante desde la tercera componente a la cuarta, pasando de un
+# 12,54% a un 3,121%, claramente se reduce considerablemente el porcentaje de varianza.
+
 names(test.pca)
 
 #Seleccionamos solo las componentes que necesitamos
 test.pca$rotation[,1:3]
 
+biplot(test.pca)
+
 # Observamos como los valores son positivos en el primer componente para lCO2, lGDPc e internet
 # Esto indica que están positivamente correlacionados con el primer componente (lCO2), y por lo tanto
 # tienden a aumentar en la misma dirección, mientras que el resto de  componentes contribuyen en la dirección
-# opuesta a este primer componente.
+# opuesta a este primer componente. Claramente el primer componente refleja a paises más desarrolados, ya que tienen un
+# mayor PIB per cápita, internet y emisiones de C02, se representa claramente un país rico, con industria e infraestructuras.
+# también relaciona los países pobres con una mayor inflacción, un mayor crecimiento del PIB y un mayor porcentaje de
+# agricultura sobre el PIB, claramente reflejando la estrucutra económica de países en vía de desarrollo.
 
-biplot(test.pca)
-
-#PC1 representa un eje de desarrollo económico. Las variables más alineadas con dicho desarrollo
-#son: lGDPc, internet, lCO2, y hay una fuerte correlación entre ellas, siendo muy semejantes.
-#Inflación, agricultura y crecimiento están más presentes en países menos desarrollados.
-#PC2 en cambio no es tan relevante ni fácil de interpretar.
+# La segunda componente es más complicada de interpretar pero parece relacionar la inflación con el crecimiento del PIB
+# lo que tendría sentido ya que un aumento de las capacidades financieras de la población también deriva e un aumento del
+# precio de  los productos.
 
 # Añadimos la región al resultado del PCA
-pca_data <- data.frame(test.pca$x[, 1:2], Region = dat$Region)
+pca_data <- data.frame(test.pca$x[, 1:2], Region = csv$Region)
 
 library(ggplot2)
 
@@ -219,11 +239,13 @@ ggplot(pca_data, aes(x = PC1, y = PC2, color = Region)) +
   labs(title = "PCA - Primeras dos componentes", x = "PC1", y = "PC2") +
   theme_minimal()
 
-#Este gráfico muestra una representación de los países proyectados en las dos primeras componentes
-#principales (PC1 y PC2), coloreados según su continente (Region), lo que nos permite identificar patrones
-#regionales y agrupamientos.
+# Este gráfico muestra una representación de los países proyectados en las dos primeras componentes
+# principales (PC1 y PC2), coloreados según su continente (Region), lo que nos permite identificar patrones
+# regionales y agrupamientos.
 
-#PC1 capta el eje desarrollo económico y separa claramente regiones como Europa y África.
-#Europa y Oceanía se agrupan a la derecha, lo que implica un alto desarrollo, por el contrario, África y
-#parte de Asia están a la izquierda por contar con un desarrollo inferior.
-#Además, América y Asia tienen diversidad interna alta, pues incluyen tanto países ricos como pobres.
+# PC1 capta el eje desarrollo económico y separa claramente regiones como Europa y África.
+# Europa y Oceanía se agrupan a la derecha, lo que implica un alto desarrollo,(en el caso de oceanía seguramente
+# por la importancia de Australia y Nueva Zelanda en la economía de la región) por el contrario, África y
+# parte de Asia están a la izquierda por contar con un desarrollo inferior.
+# Además, América y Asia tienen diversidad interna alta, pues incluyen tanto países ricos como pobres.
+
