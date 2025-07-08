@@ -43,19 +43,28 @@ deviance(z)
 #b) Calcula el valor del coeficiente de correlación de Pearson entre la variable respuesta Y y el predictor X1.
 cor(dat$inflation, y = dat$lCO2, method = "pearson")
 
+#La correlación es negativa, lo que indica que a mayor inflación tiende a haber menores emisiones per cápita de CO₂, aunque esta relación es débil.
+
+#∣r∣=0.215 -->  correlación débil
+#Aunque existe cierta asociación lineal negativa, no es fuerte ni dominante.
+
+#La inflación tiene una ligera asociación inversa con las emisiones de CO₂ per cápita, pero es posiblemente
+#no significativa o débilmente significativa.
+
 #c) Define y calcula el coeficiente de correlación parcial entre X1 y X2, controlando por el
 #resto de las variables explicativas.
 
 #ajustamos el modelo lineal de inflation sobre las otras variables y calculamos los residuos
-r_inf = residuals(lm(dat$inflation ~ dat$lCO2 + dat$lGDPc + dat$GDP.growth + dat$internet + dat$lagv))
+r_inf = residuals(lm(dat$inflation ~ dat$lCO2 + dat$GDP.growth + dat$internet + dat$lagv))
 # ajustamos el modelo lineal de lGDPc sobre las mismas variables, obteniendo también los residuos
-r_lGDPc = residuals(lm(dat$lGDPc ~ dat$lCO2 + dat$inflation + dat$GDP.growth + dat$internet + dat$lagv))
+r_lGDPc = residuals(lm(dat$lGDPc ~ dat$lCO2 + dat$GDP.growth + dat$internet + dat$lagv))
 #coeficiente de correlación entre los residuos de ambos ajustes
 cor(r_inf, r_lGDPc)
 
-# Vemos que el coeficiente es positivo, con lo que las conclusiones de una regresión múltiple irían en
-# sentido contrario a las de una regresión múltiple para estas variables.
-# El efecto de la inflación sobre el log emisiones CO2 per cápita (lGDPc) es positivo.
+# Vemos que el coeficiente es negativo, con lo que las conclusiones de una regresión múltiple irían en
+# el mismo sentido que las de una regresión múltiple para estas variables.
+# El efecto de la inflación sobre el log de emisiones CO2 per cápita (lGDPc) es negativo.
+# A mayor inflación menor será el log de emisiones CO2 per cápita.
 
 #d) Considera un modelo reducido que contiene solo un subconjunto de las variables explicativas incluidas
 #en el modelo completo. Formula y contrasta, mediante un test t, la
@@ -119,4 +128,76 @@ summary(reduced_model) # R^2 = 0.7999
 summary(full_model) # R^2 = 0.7986
 
 # Al comprobar los coeficientes de determinación de ambos modelos, podemos comprobar
-# que el modelo modelo reducido explica un poco mejor la varianza de inflation (0.7999 > 0.7986),
+# que el modelo modelo reducido explica un poco mejor la varianza de lCO2 (0.7999 > 0.7986),
+
+
+#2.Calcula las componentes principales de las variables numéricas (excepto country y Region)
+#e interpreta aquellas que conjuntamente expliquen al menos un 90 % de la variabilidad total.
+#Dibuja las dos primeras componentes principales en función del continente (Region)
+
+# Excluye las variables categóricas
+numeric_data <- dat[, !(names(dat) %in% c("country", "Region"))]
+
+# Nos aseguramos de que todo sea numérico
+numeric_data <- data.frame(lapply(numeric_data, as.numeric))
+
+# Eliminamos filas con NA
+numeric_data <- na.omit(numeric_data)
+
+#Calculamos componentes principales
+test.pca <- prcomp(numeric_data, scale. = TRUE)
+#estandarizamos las variables con scale = TRUE para que todas pesen igual en el análisis PCA, ya que se
+#encuentran en distintas escalas(unidades).
+summary(test.pca)
+
+#Empleamos prcomp() porque los datos tienen diferentes unidades de medida.
+#Vemos como las primeras 3 componentes tienen la desviación estándar más alta, lo que significa
+#que son las que que más variabilidad explican en los datos. Por el contrario, las componentes
+#finales, especialmente la 6, tienen la desviación estándar más baja, lo que indica que capturan
+#muy poca variabilidad.
+#Con las primeras 3 componentes alcanzamos el 93.58% de la variabilidad
+
+screeplot(test.pca)
+names(test.pca)
+
+#Seleccionamos solo las componentes que necesitamos
+test.pca$rotation[,1:3]
+
+# Observamos como los valores son positivos en el primer componente para LTMax, LTMin, LTMax_D y LTmin_D
+# Esto indica que están positivamente correlacionados con el primer componente (LTMax), y por lo tanto
+# tienden a aumentar en la misma dirección, mientras que el resto de  componentes contribuyen en la dirección
+# opuesta a este primer componente.
+
+biplot(test.pca)
+
+#Las temperaturas min y max están relacionadas, lo cual es lógico ya que cuanta más calor menos temperaturas
+#bajas habrá.
+
+#Por otra parte, los valores de la humedad relativa min y max también se agrupan, siendo semejantes,
+#además de que la velocidad de viento influye en ellas, aumentando y disminuyendo a la vez que estas dos.
+
+pt <- data.frame(test.pca$x[, 1:2], mes = KorTemp$mes)
+
+# Puntuaciones coloreadas de cada mes de las 2 primeras variables
+library(ggplot2)
+
+ggplot(pt, aes(x = PC1, y = PC2, color = mes)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Puntuaciones coloreadas de cada mes")
+
+
+# En el gráfico vemos como se reparten los datos entre los meses de julio (azul) y agosto (rojo).
+# En este último mes, la nube es más dispersa y tiende a menores valores de ambas componentes.
+
+# Añade la región al resultado del PCA
+pca_data <- data.frame(pca$x[, 1:2], Region = dat$Region)
+
+# Instala y carga ggplot2 si no lo tienes
+# install.packages("ggplot2")
+library(ggplot2)
+
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Region)) +
+  geom_point(size = 3) +
+  labs(title = "PCA - Primeras dos componentes", x = "PC1", y = "PC2") +
+  theme_minimal()
