@@ -64,3 +64,40 @@ summary(modelo_reducido)$adj.r.squared #0.800
 # vemos que el cambio es mínimo, se vuelve a demostrar que el modelo
 # reducido es suficiente
 
+# EJERCICIO 5
+# Filtramos los datos excluyendo América y Oceanía
+datos_filtrados <- subset(datos, !(Region %in% c("AM", "OC")))
+
+# Variables predictoras numéricas
+vars_num <- c("inflation", "lGDPc", "GDP.growth", "internet", "lagv")
+
+# Convertimos Region a factor
+datos_filtrados$Region <- as.factor(datos_filtrados$Region)
+
+# Modelo Naive Bayes
+library(e1071)
+modelo_nb <- naiveBayes(Region ~ ., data = datos_filtrados[, c("Region", vars_num)])
+pred_nb <- predict(modelo_nb, datos_filtrados)
+
+# Modelo de regresión logística multinomial
+library(nnet)
+modelo_multinom <- multinom(Region ~ ., data = datos_filtrados[, c("Region", vars_num)])
+pred_multinom <- predict(modelo_multinom, datos_filtrados)
+
+# Matrices de confusión
+table(Predicho = pred_nb, Real = datos_filtrados$Region)
+table(Predicho = pred_multinom, Real = datos_filtrados$Region)
+
+# Comentario: Revisamos qué países europeos se clasifican mal (Region == "EU").
+datos_filtrados$Mal_NB <- pred_nb != datos_filtrados$Region
+datos_filtrados$Mal_MN <- pred_multinom != datos_filtrados$Region
+subset(datos_filtrados, Region == "EU" & (Mal_NB | Mal_MN))
+
+# Aplicamos ambos modelos a países de América y Oceanía
+datos_test <- subset(datos, Region %in% c("AM", "OC"))
+pred_test_nb <- predict(modelo_nb, newdata = datos_test[, vars_num])
+pred_test_multinom <- predict(modelo_multinom, newdata = datos_test[, vars_num])
+
+# Comentario: Estas predicciones nos dicen cómo se clasificarían esos países según los modelos entrenados.
+cbind(Pais = datos_test$country, Region_Real = datos_test$Region,
+      Pred_NB = pred_test_nb, Pred_MN = pred_test_multinom)
