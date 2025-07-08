@@ -1,4 +1,4 @@
-#importamos y observamos los datos
+#importamos y observamos los csvos
 csv <- read.csv("w2011.csv", sep = ";", dec=',', header = TRUE)
 summary(csv)
 str(csv)
@@ -17,7 +17,7 @@ head(csv)
 z <- lm(lCO2 ~ inflation + lGDPc + GDP.growth + internet + lagv, data = csv)
 
 # coeficientes automáticos
-betahat <- coef(z); betahat
+coef(z)
 
 # coeficientes manuales
 X <- model.matrix(z)
@@ -49,41 +49,50 @@ ET <- sqrt(rep(sigma2, length(diag(XtXi))) * diag(XtXi))
 niv <- 0.95
 t <- qt(1 - (1 - niv)/2, n - p)
 
-betainf <- betahat - t * ET #extremos inferiores de los intervalos de confianza para los coeficientes
+betainf <- hbeta - t * ET #extremos inferiores de los intervalos de confianza para los coeficientes
 betainf
 
-betasup <- betahat + t * ET #extremos superiores
+betasup <- hbeta + t * ET #extremos superiores
 betasup
 
 # valores ajustados automáticos
 fitted(z)
 
 # valores ajustados manuales
-yhat <- X %*% betahat; yhat
+yhat <- X %*% hbeta; yhat
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # b) Calcula el valor del coeficiente de correlación de Pearson entre la variable respuesta Y
 # y el predictor X1.
 
-cor(dat$inflation, y = dat$lCO2, method = "pearson") #coeficiente de correlacion entre lCO2(y) y inflation(X1)
+cor(csv$inflation, y = csv$lCO2, method = "pearson") #coeficiente de correlacion entre lCO2(y) y inflation(X1)
+
+#La correlación es negativa, por lo que cuando la inflación es mayor hay una tendencia a que las emisiones de CO2 per cápita
+# sean menores, aunque esta relación es débil.
+
+# ∣r∣=0.215 -->  correlación débil
+# Existe cierta asociación lineal negativa, no es fuerte ni dominante.
+
+# La inflación tiene una ligera asociación inversa con las emisiones de CO₂ per cápita, pero es posiblemente
+# no significativa o débilmente significativa.
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # c) Define y calcula el coeficiente de correlación parcial entre X1 y X2, controlando por el
 # resto de las variables explicativas.
 
-r_x1 <- residuals(lm( inflation ~ GDP.growth + internet + lagv, data = csv))
-summary(r_x1)
-r_x2 <- residuals(lm( lGDPc ~ GDP.growth + internet + lagv, data = csv))
-summary(r_x2)
-cor(r_x1,r_x2)
+#ajustamos el modelo lineal de inflation sobre las otras variables y calculamos los residuos
+r_inf = residuals(lm(csv$inflation ~ csv$lCO2 + csv$GDP.growth + csv$internet + csv$lagv))
+# ajustamos el modelo lineal de lGDPc sobre las mismas variables, obteniendo también los residuos
+r_lGDPc = residuals(lm(csv$lGDPc ~ csv$lCO2 + csv$GDP.growth + csv$internet + csv$lagv))
+#coeficiente de correlación entre los residuos de ambos ajustes
+cor(r_inf, r_lGDPc) #-0.186524
 
-
-install.packages("ppcor", dep=TRUE)
-library(ppcor)
-corr_parcial_matrix = pcor(cbind(csv$inflation, csv$lGDPc,csv$GDP.growth, csv$internet, csv$lagv))
-corr_parcial_matrix$estimate[1,2]
+# Podemos ver que el coeficiente es negativo, con lo que las conclusiones de una regresión múltiple coincidirían con
+# las de una regresión múltiple para estas variables.
+# El efecto de la inflación sobre el log de emisiones CO2 per cápita (lGDPc) es negativo.
+# A mayor inflación menor será el log de emisiones CO2 per cápita.
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -92,21 +101,21 @@ corr_parcial_matrix$estimate[1,2]
 # hipótesis nula de que los coeficientes asociados a las variables excluidas son iguales a
 # cero.
 
+summary(z)
+
 # Ajustamos el modelo reducido (Sin X4)
-reduced_model <- lm(dat$lCO2 ~ dat$inflation + dat$lGDPc + dat$GDP.growth + dat$lagv)
+reduced_model <- lm(csv$lCO2 ~ csv$inflation + csv$lGDPc + csv$GDP.growth + csv$lagv)
 
 # Resumen del modelo reducido
 summary(reduced_model)
 
-# Formulando la hipótesis de que el modelo podría explicar la misma varianza de
-# FTMax siendo su coeficiente X4 igual a 0, observamos que el p-valor mostrado en
-# el summary full_model es < 2.2e-16, esto implica que las  probabilidades de que
-# la hipótesis nula sea cierta son bajas, por lo que podríamos concluír que la
-# variable X4 hace una aportación importante en nuestro modelo. Sin embargo,
-# todavía podemos probar a eliminar X3, por ser una variable poco significativa.
+# Formulando la hipótesis de que el modelo podría explicar la misma varianza de FTMax siendo su coeficiente X4 igual a 0,
+# observamos que el p-valor mostrado en el summary full_model es < 2.2e-16, esto indica que las  probabilidades de que
+# la hipótesis nula sea cierta son bajas, por lo que podríamos concluír que la variable X4 hace una aportación
+# importante en nuestro modelo. Sin embargo, todavía podemos probar a eliminar X3, por ser una variable poco significativa.
 
 # Ajustamos el modelo reducido (Sin X3)
-reduced_model2 <- lm(dat$lCO2 ~ dat$inflation + dat$lGDPc + dat$internet + dat$lagv)
+reduced_model2 <- lm(csv$lCO2 ~ csv$inflation + csv$lGDPc + csv$internet + csv$lagv)
 
 # Resumen del modelo reducido
 summary(reduced_model2)
@@ -114,7 +123,7 @@ summary(reduced_model2)
 #Observamos lo mismo que en el caso anterior.
 
 # Ajustamos el modelo reducido (Sin X3)
-reduced_model3 <- lm(dat$lCO2 ~ dat$inflation + dat$lGDPc + dat$lagv)
+reduced_model3 <- lm(csv$lCO2 ~ csv$inflation + csv$lGDPc + csv$lagv)
 
 # Resumen del modelo reducido
 summary(reduced_model3)
@@ -129,7 +138,7 @@ summary(reduced_model3)
 # correspondiente y extrae las conclusiones en función del resultado del test.
 
 # Para contrastar la variable excluida X4, usamos la función anova:
-anova(reduced_model, full_model)
+anova(reduced_model, z)
 
 # Observamos que el p-valor es extremadamente bajo (igual que en el test-t), con
 # esto anova nos está indicando que debemos ACEPTAR la hipótesis nula; es decir,
@@ -147,7 +156,7 @@ anova(reduced_model, full_model)
 # f) Compara el coeficiente de determinación ajustado para ambos modelos.
 
 summary(reduced_model) # R^2 = 0.7999
-summary(full_model) # R^2 = 0.7986
+summary(z) # R^2 = 0.7986
 
 # Al comprobar los coeficientes de determinación de ambos modelos, podemos comprobar
 # que el modelo modelo reducido explica un poco mejor la varianza de inflation (0.7999 > 0.7986),
@@ -160,23 +169,61 @@ summary(full_model) # R^2 = 0.7986
 # e interpreta aquellas que conjuntamente expliquen al menos un 90 % de la variabilidad total.
 # Dibuja las dos primeras componentes principales en función del continente (Region) (1.5ptos).
 
-datos_numericos <- csv[, !names(csv) %in% c("country", "Region")]
+# Excluye las variables categóricas
+numeric_data <- dat[, !(names(dat) %in% c("country", "Region"))]
 
-# Análisis de componentes principales
-pca <- prcomp(datos_numericos, scale. = TRUE)
+# Nos aseguramos de que todo sea numérico
+numeric_data <- data.frame(lapply(numeric_data, as.numeric))
 
-# Resumen de varianza explicada
-summary(pca)
-# Obervamos que superamos el 90% de la variabilidad con los tres primeros elementos (93.58%)
+# Eliminamos filas con NA
+numeric_data <- na.omit(numeric_data)
 
-screeplot(pca)
-screeplot(pca, type="lines")
-# Podríamos ver que le codo se forma ya en el paso de de la primera a la segunda componente pero el salto entre la
-# tercera y la cuarta también es considerable, se reduce el porcentaje de varianza de un 12,54% a un 3,121%.
+#Calculamos componentes principales
+test.pca <- prcomp(numeric_data, scale. = TRUE)
+#estandarizamos las variables con scale = TRUE para que todas pesen igual en el análisis PCA, ya que se
+#encuentran en distintas escalas(unidades).
+summary(test.pca)
 
+#Empleamos prcomp() porque los datos tienen diferentes unidades de medida.
+#Vemos como las primeras 3 componentes tienen la desviación estándar más alta, lo que significa
+#que son las que que más variabilidad explican en los datos. Por el contrario, las componentes
+#finales, especialmente la 6, tienen la desviación estándar más baja, lo que indica que capturan
+#muy poca variabilidad.
+#Con las primeras 3 componentes alcanzamos el 93.58% de la variabilidad
 
-pca$rotation[,1:4]
-biplot(pca)
+screeplot(test.pca)
+names(test.pca)
 
+#Seleccionamos solo las componentes que necesitamos
+test.pca$rotation[,1:3]
 
+# Observamos como los valores son positivos en el primer componente para lCO2, lGDPc e internet
+# Esto indica que están positivamente correlacionados con el primer componente (lCO2), y por lo tanto
+# tienden a aumentar en la misma dirección, mientras que el resto de  componentes contribuyen en la dirección
+# opuesta a este primer componente.
 
+biplot(test.pca)
+
+#PC1 representa un eje de desarrollo económico. Las variables más alineadas con dicho desarrollo
+#son: lGDPc, internet, lCO2, y hay una fuerte correlación entre ellas, siendo muy semejantes.
+#Inflación, agricultura y crecimiento están más presentes en países menos desarrollados.
+#PC2 en cambio no es tan relevante ni fácil de interpretar.
+
+# Añadimos la región al resultado del PCA
+pca_data <- data.frame(test.pca$x[, 1:2], Region = dat$Region)
+
+library(ggplot2)
+
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Region)) +
+  geom_point(size = 3) +
+  labs(title = "PCA - Primeras dos componentes", x = "PC1", y = "PC2") +
+  theme_minimal()
+
+#Este gráfico muestra una representación de los países proyectados en las dos primeras componentes
+#principales (PC1 y PC2), coloreados según su continente (Region), lo que nos permite identificar patrones
+#regionales y agrupamientos.
+
+#PC1 capta el eje desarrollo económico y separa claramente regiones como Europa y África.
+#Europa y Oceanía se agrupan a la derecha, lo que implica un alto desarrollo, por el contrario, África y
+#parte de Asia están a la izquierda por contar con un desarrollo inferior.
+#Además, América y Asia tienen diversidad interna alta, pues incluyen tanto países ricos como pobres.
