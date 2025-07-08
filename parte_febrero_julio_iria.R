@@ -65,39 +65,68 @@ summary(modelo_reducido)$adj.r.squared #0.800
 # reducido es suficiente
 
 # EJERCICIO 5
-# Filtramos los datos excluyendo América y Oceanía
+# quitamos america y oceania
 datos_filtrados <- subset(datos, !(Region %in% c("AM", "OC")))
+table(datos_filtrados$Region) #para ver que no sale ni AM ni OC
 
-# Variables predictoras numéricas
+# recogemos las variables numericas
 vars_num <- c("inflation", "lGDPc", "GDP.growth", "internet", "lagv")
 
-# Convertimos Region a factor
+# usamos region como factor
 datos_filtrados$Region <- as.factor(datos_filtrados$Region)
 
-# Modelo Naive Bayes
+# NAIVE BAYES
 library(e1071)
 modelo_nb <- naiveBayes(Region ~ ., data = datos_filtrados[, c("Region", vars_num)])
 pred_nb <- predict(modelo_nb, datos_filtrados)
 
-# Modelo de regresión logística multinomial
-library(nnet)
-modelo_multinom <- multinom(Region ~ ., data = datos_filtrados[, c("Region", vars_num)])
-pred_multinom <- predict(modelo_multinom, datos_filtrados)
+# LDA
+library(MASS)
+modelo_lda <- lda(Region ~ ., data = datos_filtrados[, c("Region", vars_num)])
+pred_lda <- predict(modelo_lda)$class
 
 # Matrices de confusión
 table(Predicho = pred_nb, Real = datos_filtrados$Region)
-table(Predicho = pred_multinom, Real = datos_filtrados$Region)
+table(Predicho = pred_lda, Real = datos_filtrados$Region)
+# Observamos que LDA presenta un rendimiento ligeramente superior a Naive Bayes.
+# En la clase Europa (EU): LDA clasifica correctamente 34 países, Naive Bayes 33, pero comete más errores
+# (mal clasifica 13 países como EU).
 
-# Comentario: Revisamos qué países europeos se clasifican mal (Region == "EU").
+# En África (AF), LDA acierta 38 casos frente a los 37 de Naive Bayes.
+
+# En Asia (AS), LDA mejora sustancialmente el acierto (16 vs 10) y reduce errores frente a Naive Bayes.
+
+# En general, LDA comete menos errores cruzados y distribuye mejor las clases.
+
+# paises europeos mal clasificados (Region == "EU").
 datos_filtrados$Mal_NB <- pred_nb != datos_filtrados$Region
-datos_filtrados$Mal_MN <- pred_multinom != datos_filtrados$Region
-subset(datos_filtrados, Region == "EU" & (Mal_NB | Mal_MN))
+datos_filtrados$Mal_LDA <- pred_lda != datos_filtrados$Region
+subset(datos_filtrados, Region == "EU" & (Mal_NB | Mal_LDA))
 
-# Aplicamos ambos modelos a países de América y Oceanía
+# En total, 7 países europeos fueron mal clasificados por al menos uno de los modelos.
+# Naive Bayes falla en 6, LDA en 5.
+
+# Países como Georgia, Moldova, Montenegro y Ukraine son mal clasificados por ambos modelos,
+# lo que sugiere que sus características numéricas
+# (por ejemplo, bajo PIB per cápita, alto peso del sector agrícola o bajo acceso a internet)
+# se asemejan más a países de Asia o África que al perfil medio europeo
+#
+# En cambio, países como Serbia o Albania solo fallan en un modelo, lo que indica que están en
+# el límite entre regiones desde el punto de vista de sus variables
+#
+# En conjunto, LDA comete menos errores en Europa y parece ofrecer una clasificación más robusta que Naive
+# Bayes para esta región
+
+
+# hacemos el estudio con AM y OC
 datos_test <- subset(datos, Region %in% c("AM", "OC"))
 pred_test_nb <- predict(modelo_nb, newdata = datos_test[, vars_num])
-pred_test_multinom <- predict(modelo_multinom, newdata = datos_test[, vars_num])
+pred_test_lda <- predict(modelo_lda, newdata = datos_test[, vars_num])
 
-# Comentario: Estas predicciones nos dicen cómo se clasificarían esos países según los modelos entrenados.
+# predicciones
 cbind(Pais = datos_test$country, Region_Real = datos_test$Region,
-      Pred_NB = pred_test_nb, Pred_MN = pred_test_multinom)
+      Pred_NB = pred_test_nb, Pred_MN = pred_lda)
+#Se observa una gran dispersión en las predicciones. Naive Bayes tiende a clasificarlos como europeos (3)
+# LDA los reparte entre África (1), Asia (2) y Europa (3)
+# Esto indica que los modelos no generalizan bien a regiones no vistas y que las variables usadas
+# no capturan con claridad las diferencias regionales en estos casos.
